@@ -1,16 +1,4 @@
-hscic_apiomatic
+Publish-o-Matic
 ===============
 
-Scrapes HSCIC website and builds a list of JSON objects for each dataset or
-key indicator found therein.
-
-Requires beautifulsoup and requests::
-
-    $ pip install -r requirements.txt
-
-Usage
------
-
-To scrape the indicator portal::
-
-    $ python grab_indicators.py
+Takes data from places, and puts them into a "Data" "Catalogue"

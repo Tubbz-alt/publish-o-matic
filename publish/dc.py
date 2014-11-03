@@ -74,12 +74,13 @@ class Dataset(object):
     def create_or_update(**deets):
         resources = deets.pop('resources')
         try:
+            print deets
             pkg =  ckan.action.package_show(id=deets['name'])
             pkg.update(deets)
             ckan.action.package_update(**pkg)
         except ckanapi.errors.NotFound:
             pkg = ckan.action.package_create(**deets)    
-
+        
         logging.info(json.dumps(pkg, indent=2))
         for resource in resources:
             resource['package_id'] = pkg['id']

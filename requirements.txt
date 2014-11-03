@@ -4,3 +4,5 @@ requests
 ckanapi
 lxml
 urlhelp
+cssselect
+awesome-slugify

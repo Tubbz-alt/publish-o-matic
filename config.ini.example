@@ -8,3 +8,8 @@ title = HSCIC
 description = The national provider of information, data and IT systems for health and social care
 image_url = http://www.hscic.gov.uk/hscic/images/toplogo.gif
 
+[publisher:unify]
+name = unify
+title = Unify
+description = Unify are an organization that
+image_url = https://pbs.twimg.com/profile_images/378800000594791858/a211b457b6f8a0c54b234d9ebb238216_400x400.png
