@@ -39,12 +39,14 @@ def fh_for_url(url):
     """
     return http.HTTPPath(url).open()
 
-
 def _org_existsp(name):
     orglist = ckan.action.organization_list()
     return name in orglist
-        
 
+def _group_existsp(name):
+    grouplist = ckan.action.group_list()
+    return name in grouplist
+    
 def ensure_publisher(name):
     """
     Ensure that the publisher NAME exists. 
@@ -64,6 +66,27 @@ def ensure_publisher(name):
     )
     return
 
+def ensure_group(name):
+    """
+    Ensure that the group NAME exists. 
+    if not, attempt to create it from our settings file or COMPLAIN LOUDLY!
+    """
+    name = name.lower()
+    if _group_existsp(name):
+        return # YAY
+    if not CONF.has_section('group:'+name):
+        what = 'Group "{0}" does not exist in the catalogue or inifile'.format(name)
+        raise NHSEnglandNotFoundException(what)
+
+    grp = dict(
+        name=CONF.get('group:'+name, 'name'),
+        title=CONF.get('group:'+name, 'title'),
+        description=CONF.get('group:'+name, 'description'),
+    )
+    ckan.action.group_create(**grp)
+    return
+
+
 class Dataset(object):
     """
     Not really a class. 
@@ -74,7 +97,6 @@ class Dataset(object):
     def create_or_update(**deets):
         resources = deets.pop('resources')
         try:
-            print deets
             pkg =  ckan.action.package_show(id=deets['name'])
             pkg.update(deets)
             ckan.action.package_update(**pkg)
@@ -94,6 +116,20 @@ class Dataset(object):
                 ckan.action.resource_update(**existing)
         return
 
+    @staticmethod
+    def rename(oldname, newname):
+        pkg = ckan.action.package_show(id=oldname)
+        pkg['title'] = newname
+        ckan.action.package_update(**pkg)
+        return
 
+    @staticmethod
+    def tag(dataset, tag):
+        oldtags = dataset['tags']
+        if len([t for t in oldtags if t['name'] == tag]) < 1:
+            dataset['tags'] = oldtags + tags(tag)
+            ckan.action.package_update(**dataset)
+        return
+    
 if __name__ == '__main__':
     getattr(ckan.action, sys.argv[-2])(id=sys.argv[-1])

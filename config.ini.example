@@ -13,3 +13,13 @@ name = unify
 title = Unify
 description = Unify are an organization that
 image_url = https://pbs.twimg.com/profile_images/378800000594791858/a211b457b6f8a0c54b234d9ebb238216_400x400.png
+
+[group:CCGOIS]
+name = CCGOIS
+title = CCGOIS
+description = The CCG Outcomes Indicator Set provides clear, comparative information for CCGs, Health and Wellbeing Boards, local authorities, patients and the public about the quality of health services commissioned by CCGs and the associated health outcomes. The indicators are useful for CCGs and Health and Wellbeing Boards in identifying local priorities for quality improvement and to demonstrate progress that local health systems are making on outcomes. More info at http://www.england.nhs.uk/ccg-ois/
+
+[group:NHSOF]
+name = NHSOF
+title = NHSOF
+description = The NHS Outcomes Framework indicators form part of the NHS Outcomes Framework. These indicators have been designed to provide national-level accountability for the outcomes the NHS delivers and drive transparency, quality improvement and outcome measurement throughout the NHS. They do not set out how these outcomes should be delivered; it is for the NHS England to determine how best to deliver improvements by working with Clinical Commissioning Groups (CCGs) to make use of the tools at their disposal. More info at http://www.hscic.gov.uk/nhsof 
