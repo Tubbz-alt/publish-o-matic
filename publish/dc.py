@@ -7,8 +7,10 @@ dc.py organization_purge hscic
 """
 import ConfigParser
 import json
-import sys
 import logging
+import sys
+import urllib
+
 import ffs
 from ffs.contrib import http
 import ckanapi
@@ -38,6 +40,12 @@ def fh_for_url(url):
     Return a file-like-object for URL!
     """
     return http.HTTPPath(url).open()
+
+def disk_fh_for_url(url):
+    tmpfile = ffs.Path.newfile()
+    print url, tmpfile
+    tmpfile << urllib.urlopen(url).read()
+    return tmpfile.open('r').next()
 
 def _org_existsp(name):
     orglist = ckan.action.organization_list()

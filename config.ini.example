@@ -14,6 +14,12 @@ title = Unify
 description = Unify are an organization that
 image_url = https://pbs.twimg.com/profile_images/378800000594791858/a211b457b6f8a0c54b234d9ebb238216_400x400.png
 
+[publisher:choose-and-book]
+name = choose-and-book
+title = Choose and Book
+description = Choose and Book is a national electronic referral service which gives patients a choice of place, date and time for their first outpatient appointment in a hospital or clinic.
+image_url = https://www.ebs.ncrs.nhs.uk/app-cabpatient/images/CabLogo.gif
+
 [group:CCGOIS]
 name = CCGOIS
 title = CCGOIS

@@ -23,7 +23,7 @@ logging.basicConfig(filename='indicators.log',
 
 
 URL_TEMPLATE = "https://indicators.ic.nhs.uk/webview/velocity?v=2&mode=documentation&submode=ddi&study=http%3A%2F%2F172.16.9.26%3A80%2Fobj%2FfStudy%2FP{:05}"
-DATA_DIR = os.path.realpath(os.path.join('../', os.path.dirname(__file__)))
+
 
 def get_indicator(i, directory):
     """
@@ -32,12 +32,13 @@ def get_indicator(i, directory):
 
     Will then return a dict containing metadata extracted from the HTML.
     """
-    logging.info(i)
+    logging.info('Indicator ID: {}'.format(i))
     path = os.path.join(directory, '{}.html'.format(i))
     html = ''
     if os.path.isfile(path):
         html = open(path).read()
-    else:
+
+    if not html:
         url = URL_TEMPLATE.format(i)
         logging.info('Requesting {}'.format(url))
         response = requests.get(url)
@@ -45,9 +46,10 @@ def get_indicator(i, directory):
         if response.status_code < 400:
             html = response.text
             with open(path, 'wb') as cached:
-                cached.write(html)
+                cached.write(html.encode('utf-8'))
     result = {}
     if html:
+        logging.info('Got HTML')
         soup = BeautifulSoup(html)
         data = soup.find(id="metadata")
         children = []
@@ -87,22 +89,23 @@ def get_indicator(i, directory):
                     'filetype': filetype,
                 })
             result['sources'] = sources
+        else:
+            logging.error('NO CONTENT FOUND')
+    else:
+        logging.error('UNABLE TO GET PAGE FOR {}'.format(i))
     return result
 
 
 if __name__ == '__main__':
     result = []
-    directory = os.path.join(DATA_DIR, 'indicators_raw')
+    directory = 'indicators_raw'
     filename = 'indicators.json'
     if not os.path.exists(directory):
         logging.info('Creating directory {}'.format(directory))
         os.makedirs(directory)
     for i in range(1, 1699):
-        try:
-            indicator = get_indicator(i, directory)
-            if indicator:
-                result.append(indicator)
-        except Exception as ex:
-            logging.error(ex)
+        indicator = get_indicator(i, directory)
+        if indicator:
+            result.append(indicator)
     json.dump(result, open(filename, 'wb'), indent=2)
     logging.info('Written results to {}'.format(filename))
