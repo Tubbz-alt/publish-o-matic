@@ -8,6 +8,12 @@ title = HSCIC
 description = The national provider of information, data and IT systems for health and social care
 image_url = http://www.hscic.gov.uk/hscic/images/toplogo.gif
 
+[publisher:hscic-ods]
+name = hscic-ods
+title = Organisation Data Service (HSCIC)
+description = We are responsible for the publication of codes to identify organisations and individuals across health and social care. We issue and maintain many of these codes and publish some on behalf of third parties.
+image_url = http://www.hscic.gov.uk/hscic/images/toplogo.gif
+
 [publisher:unify]
 name = unify
 title = Unify

@@ -8,6 +8,7 @@ dc.py organization_purge hscic
 import ConfigParser
 import json
 import logging
+import mimetypes
 import sys
 import urllib
 
@@ -42,10 +43,15 @@ def fh_for_url(url):
     return http.HTTPPath(url).open()
 
 def disk_fh_for_url(url):
-    tmpfile = ffs.Path.newfile()
+    tmpfile = ffs.Path.newfile(url.split('/')[-1])
     print url, tmpfile
     tmpfile << urllib.urlopen(url).read()
-    return tmpfile.open('r').next()
+    return open(tmpfile, 'r')
+
+def filetype(url):
+    tp, enc = mimetypes.guess_type(url)
+    if not tp: return ''
+    return tp
 
 def _org_existsp(name):
     orglist = ckan.action.organization_list()
