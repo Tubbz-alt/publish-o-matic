@@ -38,7 +38,7 @@ def publish_choose_and_book():
             url='http://www.chooseandbook.nhs.uk/staff/bau/reports',
             tags=dc.tags(*dataset['tags']),
             resources=resources,
-            owner_org=''
+            owner_org='choose-and-book'
         )
     return 
         
