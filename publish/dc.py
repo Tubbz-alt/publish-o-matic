@@ -51,7 +51,7 @@ def disk_fh_for_url(url):
 def filetype(url):
     tp, enc = mimetypes.guess_type(url)
     if not tp: return ''
-    return tp
+    return tp.split('/')[-1]
 
 def _org_existsp(name):
     orglist = ckan.action.organization_list()

@@ -23,12 +23,13 @@ def publish_ods():
         resources = [
             dict(
                 description=s['description'],
-                name=s['description'],
+                name=s['url'].split('/')[-1],
                 format=dc.filetype(s['url']),
                 upload=dc.disk_fh_for_url(s['url'])          
             )
             for s in dataset['resources']
         ]
+        print resources
         dc.Dataset.create_or_update(
             name=dataset['title'].lower().replace(' ', '-'),
             title=dataset['title'],
@@ -40,6 +41,7 @@ def publish_ods():
             resources=resources,
             owner_org='hscic-ods'
         )
+        break
     return 
         
 def main():

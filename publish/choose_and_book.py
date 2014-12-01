@@ -25,7 +25,7 @@ def publish_choose_and_book():
                 description=s['description'],
                 name=s['description'],
                 format=s['filetype'],
-                upload=dc.disk_fh_for_url(s['url'])          
+                upload=dc.disk_fh_for_url(s['url'])
             )
             for s in dataset['resources']
         ]

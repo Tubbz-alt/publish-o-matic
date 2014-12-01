@@ -1,4 +1,4 @@
-[ckan]
+[liveckan]
 url = http://ec2-54-194-162-22.eu-west-1.compute.amazonaws.com/
 api_key = your_key_here
 
