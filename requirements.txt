@@ -6,3 +6,4 @@ lxml
 urlhelp
 cssselect
 awesome-slugify
+html2text
