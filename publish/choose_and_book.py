@@ -8,17 +8,25 @@ import ffs
 import dc
 
 DATA_DIR = ffs.Path.here()/'../data/'
+CB_DIR = DATA_DIR/'choose_and_book'
+metadatafile = DATA_DIR/'choose.and.book.json'
+metadata = metadatafile.json_load()
 
 class Error(Exception): 
     def __init__(self, msg):
         Exception.__init__(self, '\n\n\n{0}\n\n\n'.format(msg))
 
+def download_choose_and_book():
+    """
+    Download the choose and book data into a safe place
+    """
+    for 
+    return
+        
 def publish_choose_and_book():
     """
     Do Useful Work Here
     """
-    metadatafile = DATA_DIR/'choose.and.book.json'
-    metadata = metadatafile.json_load()
     for dataset in metadata:
         resources = [
             dict(
@@ -44,6 +52,7 @@ def publish_choose_and_book():
         
 def main():
     dc.ensure_publisher('choose-and-book')
+    download_choose_and_book()
     publish_choose_and_book()
     return 0
 
