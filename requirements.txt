@@ -1,6 +1,7 @@
 beautifulsoup4
 requests
 -e git://github.com/davidmiller/ffs#egg=ffs
+-e git://github.com/davidmiller/dc#egg=dc
 ckanapi
 lxml
 urlhelp
