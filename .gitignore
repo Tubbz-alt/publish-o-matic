@@ -61,3 +61,5 @@ indicators_raw/*
 *.json
 config.ini
 *~
+
+datasets/*/data
