@@ -3,6 +3,7 @@ Load the QOF datasets into a CKAN instance
 """
 import sys
 
+import ckanapi
 import dc
 import ffs
 import slugify
@@ -47,20 +48,26 @@ def load_qof():
     return
 
 def group_qof():
+    remaining = []
     for _, _, metadata in datasets():
         dataset_name = slugify.slugify(metadata['title']).lower()
-        dataset = dc.ckan.action.package_show(name=dataset_name)
+        try:
+            dataset = dc.ckan.action.package_show(id=dataset_name)
+        except ckanapi.errors.NotFound:
+            remaining.append(dataset_name)
+            continue
         
-        if [g for g in dataset['groups'] if g['name'] == 'qof']:
-            print 'Already in group', group
+        if [g for g in dataset['groups'] if g['name'].lower() == 'qof']:
+            print 'Already in QOF group'
 
         else:
             dc.ckan.action.member_create(
-                id='QOF', 
+                id='qof', 
                 object=dataset['name'],
                 object_type='package',
                 capacity='member'
             )
+    print remaining
     return
 
 def main():
