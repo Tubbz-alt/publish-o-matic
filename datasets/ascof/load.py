@@ -44,6 +44,12 @@ def load_ascof():
                 dict(key='publication_date', value=metadata['publication_date'])
             ]
         )
+        print [
+                dict(key='coverage_beginning_date', value=metadata['coverage_beginning_date']),
+                dict(key='coverage_ending_date', value=metadata['coverage_ending_date']),
+                dict(key='frequency', value=metadata['frequency']),
+                dict(key='publication_date', value=metadata['publication_date'])
+            ]
     return
 
 def group_ascof():
