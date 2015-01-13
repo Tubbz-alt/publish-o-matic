@@ -68,7 +68,6 @@ def ascof_dataset(url):
         
     return dataset
 
-
 def find_ascof_datasets():
     """
     Iterate through the scraped HSCIC Metadata and then spit out our
