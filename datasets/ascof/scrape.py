@@ -12,8 +12,7 @@ import re
 import requests
 
 HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
-DATA_DIR.mkdir()
+DATA_DIR = None
 METADATA_DIR = HERE / '../../metadata/data'
 
 HSCIC_DATASETS = METADATA_DIR/'datasets.json'
@@ -93,9 +92,11 @@ def retrieve_ascof_datasets(datasets):
         metadata_file << json.dumps(dataset, indent=2)
 
 def main(workspace):
+    DATA_DIR = ffs.Path(workspace) / 'data'
+
     datasets = find_ascof_datasets()
     retrieve_ascof_datasets(datasets)
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))
