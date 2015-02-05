@@ -10,18 +10,11 @@ import pkgutil
 import random
 import sys
 
+from publish.lib.manifest import get_scraper_names
 
 def get_launch_binary():
     this_location = sys.argv[0]
     return os.path.join(os.path.dirname(this_location), "run_scraper")
-
-def get_scrapers():
-    """
-    For now, gets all the scrapers by finding all the modules within
-    the datasets module.  Later, will pull this from a manifest/entrypoint
-    where config etc is stored.
-    """
-    return [name for _, name, _ in pkgutil.iter_modules(['datasets'])]
 
 def get_random_hours_and_minutes():
     random.seed()
@@ -29,7 +22,7 @@ def get_random_hours_and_minutes():
 
 def main():
     binary = get_launch_binary()
-    for scraper in get_scrapers():
+    for scraper in get_scraper_names():
         cli = "{cmd} {scraper}".format(cmd=binary, scraper=scraper )
         hour, minute = get_random_hours_and_minutes()
         crontime = "{} {} * * * {}".format(minute, hour, cli)

@@ -31,8 +31,8 @@ def add_metadata_to_ascof_datasets():
         metadata_file.truncate()
         metadata_file << json.dumps(metadata, indent=2)
     return
-        
-def main():
+
+def main(workspace):
     add_metadata_to_ascof_datasets()
     return 0
 

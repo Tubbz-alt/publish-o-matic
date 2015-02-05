@@ -7,8 +7,7 @@ import dc
 import ffs
 import slugify
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
+DATA_DIR = None
 
 def datasets():
     for directory in DATA_DIR.ls():
@@ -50,20 +49,21 @@ def group_ascof():
     for _, _, metadata in datasets():
         dataset_name = slugify.slugify(metadata['title']).lower()
         dataset = dc.ckan.action.package_show(id=dataset_name)
-        
+
         if [g for g in dataset['groups'] if g['name'].lower() == 'ascof']:
             print 'Already in group', group
 
         else:
             dc.ckan.action.member_create(
-                id='ascof', 
+                id='ascof',
                 object=dataset['name'],
                 object_type='package',
                 capacity='member'
             )
     return
 
-def main():
+def main(workspace):
+    DATA_DIR = ffs.Path(workspace) / 'data'
     dc.ensure_publisher('hscic')
     dc.ensure_group('ASCOF')
     load_ascof()
@@ -71,4 +71,4 @@ def main():
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))

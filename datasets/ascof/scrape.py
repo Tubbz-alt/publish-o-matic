@@ -65,7 +65,7 @@ def ascof_dataset(url):
     summary = html2text.html2text(tostring(dataset_tree.cssselect('.summary')[0]))
     dataset['summary'] = summary
     dataset['resources'] = _hscic_resources_from_tree(dataset_tree)
-        
+
     return dataset
 
 def find_ascof_datasets():
@@ -92,7 +92,7 @@ def retrieve_ascof_datasets(datasets):
             metadata_file.truncate()
         metadata_file << json.dumps(dataset, indent=2)
 
-def main():
+def main(workspace):
     datasets = find_ascof_datasets()
     retrieve_ascof_datasets(datasets)
     return 0
