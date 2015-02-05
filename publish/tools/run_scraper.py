@@ -63,7 +63,7 @@ def main():
                 entry_points[task](workspace)
             except Exception as e:
                 # TODO: Log e and notify someone...
-                pass
+                print e
 
 
 
