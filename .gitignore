@@ -55,9 +55,12 @@ target/
 
 # VIM
 *.swp
+*.DS_Store
 
 # Application
 indicators_raw/*
 *.json
 config.ini
 *~
+
+datasets/*/data
