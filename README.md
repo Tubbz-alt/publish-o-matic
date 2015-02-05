@@ -2,7 +2,22 @@
 
 Takes data from places, and puts them into a "Data" "Catalogue"
 
-## Installation
+## Manual Installation
+
+1. Set up a virtualenv using your favourite tool for doing so, and activate it.
+
+2. ```git clone git@github.com:nhsengland/publish-o-matic.git```
+
+3. ```python setup.py install``` # or develop if you insist on it being changeable
+
+4. See below for setting up cronjobs
+
+5. To manually run a scraper do ``` run_scraper <NAME>``` where name is the name of a module in the datasets module.
+
+
+**TODO**: Merge steps 2 and 3.
+
+
 
 
 ## Setting up a cronjob
