@@ -92,6 +92,7 @@ def retrieve_ascof_datasets(datasets):
         metadata_file << json.dumps(dataset, indent=2)
 
 def main(workspace):
+    global DATA_DIR
     DATA_DIR = ffs.Path(workspace) / 'data'
 
     datasets = find_ascof_datasets()

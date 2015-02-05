@@ -8,8 +8,7 @@ import sys
 import ffs
 import re
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
+DATA_DIR = None
 
 def datasets():
     for directory in DATA_DIR.ls():
@@ -33,11 +32,13 @@ def add_metadata_to_ascof_datasets():
     return
 
 def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
     add_metadata_to_ascof_datasets()
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))
 
 
 
