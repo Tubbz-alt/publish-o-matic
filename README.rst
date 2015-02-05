@@ -10,6 +10,6 @@ Contains individual STL (Scrape, Transform, Load) procedures for curated dataset
 
 Each directory is expected to contain a data dir (For cached/retrieved data files) and three files: 
 
-scrape.py - scrape the data files and metadata
-transform.py - make adjustments / additions to scraped metadata as required
-load.py - load the datasets into a CKAN instance. 
+* scrape.py - scrape the data files and metadata
+* transform.py - make adjustments / additions to scraped metadata as required
+* load.py - load the datasets into a CKAN instance. 
