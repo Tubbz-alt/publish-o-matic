@@ -9,13 +9,11 @@ import ffs
 from lxml.html import fromstring
 import requests
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
-DATA_DIR.mkdir()
+DATA_DIR = None
 
 DOWNLOADS = 'http://systems.hscic.gov.uk/data/ods/datadownloads/index'
 
-class Error(Exception): 
+class Error(Exception):
     def __init__(self, msg):
         Exception.__init__(self, '\n\n\n{0}\n\n\n'.format(msg))
 
@@ -44,7 +42,7 @@ def check_sanity_of(metadata):
                 print resource
                 raise Error('You scraped a resource without noting the URL Larry')
     return
-        
+
 def fetch_dataset_metadata(url):
     """
     Given a URL, fetch the metadata and resources
@@ -76,7 +74,7 @@ def fetch_dataset_metadata(url):
                     description, name, created = row
             else:
                 name, description, created = row
-                
+
             resource = {
                 'url': name.cssselect('a')[0].get('href'),
                 'name': name.text_content().strip(),
@@ -107,7 +105,7 @@ def fetch_dataset_metadata(url):
 
     metadata['resources'] = resources
     return metadata
-        
+
 def fetch_ods_metadata():
     """
     * Fetch the list of downloads from the download index
@@ -121,7 +119,7 @@ def fetch_ods_metadata():
     metadata = [fetch_dataset_metadata(url) for url in categories]
 
     check_sanity_of(metadata)
-    
+
     metafile = DATA_DIR/'dataset.metadata.json'
     if metafile:
         metafile.truncate()
@@ -131,7 +129,7 @@ def fetch_ods_metadata():
 def fetch_ods_data():
     """
     Given the metadata we've scraped from ODS, let's now download the
-    data files! 
+    data files!
     """
     metafile = DATA_DIR/'dataset.metadata.json'
     metadata = metafile.json_load()
@@ -143,11 +141,13 @@ def fetch_ods_data():
                 print resource['url']
                 urllib.urlretrieve(resource['url'], resource['url'].split('/')[-1])
     return
-    
-def main():
+
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
     fetch_ods_metadata()
 #    fetch_ods_data()
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))
