@@ -47,6 +47,7 @@ setup(
             'hqip=datasets.hqip:entrypoints',
             'nhsof=datasets.nhsof:entrypoints',
             'ods=datasets.ods:entrypoints',
+            'phof=datasets.phof:entrypoints',
         ]
     }
 )

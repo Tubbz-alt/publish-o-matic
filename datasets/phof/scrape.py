@@ -7,9 +7,7 @@ import urllib
 
 import ffs
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
-DATA_DIR.mkdir()
+DATA_DIR = None
 
 PHOF_DATA_FILE = 'http://livews-b.phe.org.uk/GetDataDownload.ashx?pid=19&ati=102&res=19&tem=19&par=E92000001&pds=0&pat=6'
 
@@ -32,9 +30,11 @@ def pull_phof_datasets():
     metadata_file << json.dumps(dataset, indent=2)
     return
 
-def main():
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
     pull_phof_datasets()
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))

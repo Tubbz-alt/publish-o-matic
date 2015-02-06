@@ -7,8 +7,7 @@ import dc
 import ffs
 import slugify
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
+DATA_DIR = None
 
 def datasets():
     metadata = DATA_DIR/'dataset.metadata.json'
@@ -49,20 +48,22 @@ def group_phe():
     for _, _, metadata in datasets():
         dataset_name = slugify.slugify(metadata['title']).lower()
         dataset = dc.ckan.action.package_show(id=dataset_name)
-        
+
         if [g for g in dataset['groups'] if g['name'].lower() == 'phe']:
             print 'Already in group', group
 
         else:
             dc.ckan.action.member_create(
-                id='phe', 
+                id='phe',
                 object=dataset['name'],
                 object_type='package',
                 capacity='member'
             )
     return
 
-def main():
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
     dc.ensure_publisher('phe')
     dc.ensure_group('PHOF')
     load_phe()
@@ -70,4 +71,4 @@ def main():
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))

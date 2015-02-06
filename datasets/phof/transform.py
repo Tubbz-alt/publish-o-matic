@@ -8,8 +8,7 @@ import sys
 import ffs
 import re
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
+DATA_DIR = None
 
 PHOF_SUMMARY = """The Public Health Outcomes Framework Healthy lives, healthy people: Improving outcomes and supporting transparency sets out a vision for public health, desired outcomes and the indicators that will help us understand how well public health is being improved and protected.
 
@@ -26,26 +25,28 @@ To provide comments and suggestions please e-mail phof.enquiries@phe.gov.uk."""
 def add_metadata_to_ascof_datasets():
     metadata_file = DATA_DIR/'dataset.metadata.json'
     metadata = metadata_file.json_load()
-    
+
     metadata['tags'] = ['PHOF', 'Public Health Outcomes Framework']
     metadata['title'] ='PHOF - Public Health Outcomes Framework'
     metadata['frequency'] = 'yearly'
     metadata['summary'] = PHOF_SUMMARY
     metadata['source'] = 'http://www.phoutcomes.info/public-health-outcomes-framework'
-    
+
     metadata['coverage_beginning_date'] = '01/01/2000'
     metadata['coverage_ending_date'] = '31/12/2013'
 
     metadata_file.truncate()
     metadata_file << json.dumps(metadata, indent=2)
     return
-        
-def main():
+
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
     add_metadata_to_ascof_datasets()
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))
 
 
 
