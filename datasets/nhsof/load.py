@@ -1,7 +1,9 @@
 """
 Load the QOF datasets into a CKAN instance
 """
+import os
 import dc
+import ffs
 import json
 import slugify
 
@@ -67,9 +69,23 @@ def group_ccgois(datasets):
     return
 
 
-if __name__ == '__main__':
-    datasets = json.load(open('nhsof_metadata_indicators.json'))
+def get_metadata_file(filename):
+    # TODO: Move into a helper
+    root = os.path.dirname(__file__)
+    f = os.path.join(root, os.path.pardir, os.path.pardir, "metadata", filename)
+    return os.path.abspath(f)
+
+DATA_DIR = None
+
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
+    datasets = json.load(open(DATA_DIR / 'data/nhsof_metadata_indicators.json', 'r'))
     dc.ensure_publisher('hscic')
-    dc.ensure_group('NHSOF', 'hscic')
+    dc.ensure_group('NHSOF')
+    dc.ensure_group('hscic')
     #load_ccgois(datasets)
     group_ccgois(datasets)
+
+if __name__ == '__main__':
+    main(ffs.Path.here())

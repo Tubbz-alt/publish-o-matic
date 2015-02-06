@@ -45,6 +45,7 @@ setup(
             'ascof=datasets.ascof:entrypoints',
             'ccgois=datasets.ccgois:entrypoints',
             'hqip=datasets.hqip:entrypoints',
+            'nhsof=datasets.nhsof:entrypoints',
         ]
     }
 )

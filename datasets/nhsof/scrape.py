@@ -1348,9 +1348,15 @@ Not applicable
     },
 }
 
+import os
 
-if __name__ == '__main__':
-    all_indicators = json.load(open('indicators.json'))
+def get_metadata_file(filename):
+    root = os.path.dirname(__file__)
+    f = os.path.join(root, os.path.pardir, os.path.pardir, "metadata", filename)
+    return os.path.abspath(f)
+
+def main(workspace):
+    all_indicators = json.load(open(get_metadata_file('data/indicators.json'),'r'))
     ccgois_indicators = []
     found = []
     for indicator in all_indicators:
@@ -1375,4 +1381,7 @@ if __name__ == '__main__':
     for k in CCGOIS_INDICATORS:
         if k not in found:
             raise ValueError('{} not found')
-    json.dump(ccgois_indicators, open('ccgois_indicators.json', 'wb'), indent=2)
+    json.dump(ccgois_indicators, open(get_metadata_file('data/ccgois_indicators.json'),'wb'), indent=2)
+
+if __name__ == '__main__':
+    main(ffs.Path.here())
