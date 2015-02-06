@@ -8,13 +8,12 @@ import sys
 import ffs
 import re
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
+DATA_DIR = None
 
 def datasets():
     for directory in DATA_DIR.ls():
         metadata = directory/'dataset.metadata.json'
-        yield directory, metadata, metadata.json_load()    
+        yield directory, metadata, metadata.json_load()
 
 def add_metadata_to_qof_datasets():
     for directory, metadata_file, metadata in datasets():
@@ -31,13 +30,15 @@ def add_metadata_to_qof_datasets():
         metadata_file.truncate()
         metadata_file << json.dumps(metadata, indent=2)
     return
-        
-def main():
+
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
     add_metadata_to_qof_datasets()
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))
 
 
 

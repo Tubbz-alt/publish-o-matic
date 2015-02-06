@@ -64,10 +64,13 @@ def group_ccgois(datasets):
             )
     return
 
-
-if __name__ == '__main__':
+def main(workspace):
     datasets = json.load(open('ccgois_indicators.json'))
     dc.ensure_publisher('hscic')
-    dc.ensure_group('CCGOIS', 'hscic')
+    dc.ensure_group('CCGOIS')
+    dc.ensure_group('hscic')
     #load_ccgois(datasets)
     group_ccgois(datasets)
+
+if __name__ == '__main__':
+    main(None)

@@ -43,6 +43,7 @@ setup(
         ],
         'scrapers': [
             'ascof=datasets.ascof:entrypoints',
+            'ccgois=datasets.ccgois:entrypoints',
         ]
     }
 )
