@@ -20,7 +20,8 @@ setup(
     include_package_data=True,
     dependency_links=[
         "http://github.com/davidmiller/ffs/tarball/master#egg=ffs-0.0.8",
-        "http://github.com/davidmiller/dc/tarball/master#egg=dc-0.0.1"
+        "http://github.com/davidmiller/dc/tarball/master#egg=dc-0.0.1",
+        "http://github.com/rossjones/dmswitch/tarball/master#egg=dmswitch-0.0.1"
     ],
     install_requires = [
         "awesome-slugify==1.6.1",
@@ -32,7 +33,8 @@ setup(
         "requests==2.5.1",
         "urlhelp==0.0.1",
         "dc==0.0.1",
-        "ffs==0.0.8"
+        "ffs==0.0.8",
+        "dmswitch==0.0.1"
     ],
     entry_points = {
         'console_scripts': [
