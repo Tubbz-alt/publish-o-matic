@@ -36,7 +36,7 @@ def usage(error):
     sys.stderr.write("\n\n")
 
 def get_or_create_workspace(name):
-    return '/tmp/ascof'
+    return '/tmp/{}'.format(name)
 
 def main():
     """
