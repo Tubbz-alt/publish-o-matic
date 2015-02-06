@@ -14,16 +14,17 @@ from dc import ckan as catalogue
 from dc import _org_existsp, Dataset
 import ffs
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
-DATA_DIR.mkdir()
+DATA_DIR = None
 
 SOURCE = "http://data.gov.uk"
 TARGET_ORGANISATION = "healthcare-quality-improvement-partnership"
- 
+
 dgu =  ckanapi.RemoteCKAN(SOURCE)
 
-def main():
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
+
     org = dgu.action.organization_show(id=TARGET_ORGANISATION)
 
     print "Found {0} datasets on source".format(len(org['packages']))
@@ -50,7 +51,7 @@ def main():
                     continue
                 if resource['url'].startswith('hhttps'):
                     resource['url'] = resource['url'].replace('hhttps', 'https')
-                
+
                 print 'downloading', resource['url']
                 filename = resource['url'].split('/')[-1]
                 datafile = dataset_dir/filename
@@ -63,6 +64,6 @@ def main():
                     print 'FTW Larry? We got a socket error :('
                     continue
 
-        
+
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))

@@ -14,19 +14,20 @@ from dc import ckan as catalogue
 from dc import _org_existsp, Dataset
 import ffs
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
-DATA_DIR.mkdir()
+DATA_DIR = None
 
 SOURCE = "http://data.gov.uk"
 TARGET_ORGANISATION = "healthcare-quality-improvement-partnership"
- 
+
 dgu =  ckanapi.RemoteCKAN(SOURCE)
 
 def format_date(date):
     return datetime.datetime.strptime(date, "%d/%m/%Y").strftime("%Y-%m-%d")
 
-def main():
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
+
     org = dgu.action.organization_show(id=TARGET_ORGANISATION)
 
     if not _org_existsp(TARGET_ORGANISATION):
@@ -36,7 +37,7 @@ def main():
             description=org['description'],
             image_url=org['image_display_url']
         )
-        
+
     print "Found {0} datasets on source".format(len(org['packages']))
 
     for package in org['packages']:
@@ -59,7 +60,7 @@ def main():
                     continue
                 if resource['url'].startswith('hhttps'):
                     resource['url'] = resource['url'].replace('hhttps', 'https')
-                
+
                 filename = resource['url'].split('/')[-1]
                 datafile = dataset_dir/filename
                 if datafile.is_dir:
@@ -69,13 +70,13 @@ def main():
                 resources.append(resource)
 
         dataset['resources'] = resources
-        
+
         # Add a nice tag so we can find them all again
         dataset['tags'].append({'name': 'HQIP' })
         print 'Owner org is', org['name']
         try:
             extras = [
-                    dict(key='coverage_start_date', value=format_date(dataset['temporal_coverage-from'])), 
+                    dict(key='coverage_start_date', value=format_date(dataset['temporal_coverage-from'])),
                     dict(key='coverage_end_date', value=format_date(dataset['temporal_coverage-to'])),
                     dict(key='frequency', value=dataset['update_frequency']),
                 ]
@@ -102,4 +103,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(ffs.Path.here()))
