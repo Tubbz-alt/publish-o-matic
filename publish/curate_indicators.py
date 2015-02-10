@@ -11,19 +11,19 @@ import dc
 
 DATA_DIR = ffs.Path.here()/'../data'
 
-class Error(Exception): 
+class Error(Exception):
     def __init__(self, msg):
         Exception.__init__(self, '\n\n\n{0}\n\n\n'.format(msg))
- 
+
 dataset_from_indicator = lambda indicator: dc.ckan.action.package_show(id='hscic_indicator_' + indicator['unique identifier'].lower())
 
 def is_indicator(indicator):
     """
     Predicate function to determine whether a dataset is in fact an
-    indicator of the sort we're interested in 
+    indicator of the sort we're interested in
     """
     return len([s for s in indicator['sources'] if s['description'] == 'Indicator specification']) > 0
-        
+
 def determine_framework(indicator):
     """
     Return the framework name
@@ -35,7 +35,7 @@ def determine_framework(indicator):
     if 'Outcomes Framework' in fristurl:
         name = 'NHSOF'
     return name
-        
+
 def rename(indicator, newname):
     """
     Rename the INDICATOR to NEWNAME
@@ -60,7 +60,7 @@ def add_to_group(indicator, group):
         print 'Already in group', group
         return
     dc.ckan.action.member_create(
-        id=group, 
+        id=group,
         object=dataset['name'],
         object_type='package',
         capacity='member'
@@ -69,11 +69,11 @@ def add_to_group(indicator, group):
 
 def curate_hscic_indicators():
     """
-    Curate it! 
+    Curate it!
     """
-    dc.ensure_group('NHSOF')
-    dc.ensure_group('CCGOIS')
-    
+    dc.ensure_group('nhsof')
+    dc.ensure_group('ccgois')
+
     indicators = DATA_DIR/'indicators.json'
     data = indicators.json_load()
     for indicator in data:
@@ -88,7 +88,7 @@ def curate_hscic_indicators():
             add_tag(indicator, framework)
             add_to_group(indicator, framework)
     return
-        
+
 def main():
     curate_hscic_indicators()
     return 0

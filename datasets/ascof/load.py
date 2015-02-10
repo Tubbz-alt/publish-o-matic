@@ -25,9 +25,10 @@ def load_ascof():
             )
             for r in metadata['resources']
         ]
-        print 'Creating', metadata['title']
+        slug = slugify.slugify(metadata['title']).lower()
+        print 'Creating', metadata['title'], slug
         dc.Dataset.create_or_update(
-            name=slugify.slugify(metadata['title']).lower(),
+            name=slug,
             title=metadata['title'],
             state='active',
             licence_id='ogl',
@@ -51,7 +52,7 @@ def group_ascof():
         dataset = dc.ckan.action.package_show(id=dataset_name)
 
         if [g for g in dataset['groups'] if g['name'].lower() == 'ascof']:
-            print 'Already in group', group
+            print 'Already in group', g
 
         else:
             dc.ckan.action.member_create(
@@ -66,7 +67,7 @@ def main(workspace):
     global DATA_DIR
     DATA_DIR = ffs.Path(workspace) / 'data'
     dc.ensure_publisher('hscic')
-    dc.ensure_group('ASCOF')
+    dc.ensure_group('ascof')
     load_ascof()
     group_ascof()
     return 0

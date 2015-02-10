@@ -56,13 +56,13 @@ def group_qof():
         except ckanapi.errors.NotFound:
             remaining.append(dataset_name)
             continue
-        
+
         if [g for g in dataset['groups'] if g['name'].lower() == 'qof']:
             print 'Already in QOF group'
 
         else:
             dc.ckan.action.member_create(
-                id='qof', 
+                id='qof',
                 object=dataset['name'],
                 object_type='package',
                 capacity='member'
@@ -72,7 +72,7 @@ def group_qof():
 
 def main():
     dc.ensure_publisher('hscic')
-    dc.ensure_group('QOF')
+    dc.ensure_group('qof')
     load_qof()
     group_qof()
     return 0

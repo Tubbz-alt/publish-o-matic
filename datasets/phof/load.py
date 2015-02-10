@@ -50,7 +50,7 @@ def group_phe():
         dataset = dc.ckan.action.package_show(id=dataset_name)
 
         if [g for g in dataset['groups'] if g['name'].lower() == 'phe']:
-            print 'Already in group', group
+            print 'Already in group', g
 
         else:
             dc.ckan.action.member_create(
@@ -65,7 +65,7 @@ def main(workspace):
     global DATA_DIR
     DATA_DIR = ffs.Path(workspace) / 'data'
     dc.ensure_publisher('phe')
-    dc.ensure_group('PHOF')
+    dc.ensure_group('phof')
     load_phe()
     group_phe()
     return 0

@@ -54,7 +54,7 @@ def group_ccgois(datasets):
         dataset = dc.ckan.action.package_show(id=dataset_name)
 
         if [g for g in dataset.get('groups', []) if g['name'] == 'ccgois']:
-            print 'Already in group'
+            print 'Already in group', g
         else:
             dc.ckan.action.member_create(
                 id='ccgois',
@@ -67,8 +67,7 @@ def group_ccgois(datasets):
 def main(workspace):
     datasets = json.load(open('ccgois_indicators.json'))
     dc.ensure_publisher('hscic')
-    dc.ensure_group('CCGOIS')
-    dc.ensure_group('hscic')
+    dc.ensure_group('ccgois')
     #load_ccgois(datasets)
     group_ccgois(datasets)
 

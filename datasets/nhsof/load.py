@@ -58,7 +58,7 @@ def group_ccgois(datasets):
         dataset = dc.ckan.action.package_show(id=dataset_name)
 
         if [g for g in dataset.get('groups', []) if g['name'] == 'nhsof']:
-            print 'Already in group'
+            print 'Already in group', g
         else:
             dc.ckan.action.member_create(
                 id='nhsof',
@@ -82,8 +82,8 @@ def main(workspace):
     DATA_DIR = ffs.Path(workspace) / 'data'
     datasets = json.load(open(DATA_DIR / 'data/nhsof_metadata_indicators.json', 'r'))
     dc.ensure_publisher('hscic')
-    dc.ensure_group('NHSOF')
-    dc.ensure_group('hscic')
+    dc.ensure_group('nhsof')
+    #dc.ensure_group('hscic')
     #load_ccgois(datasets)
     group_ccgois(datasets)
 

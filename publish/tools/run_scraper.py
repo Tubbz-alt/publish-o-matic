@@ -8,6 +8,7 @@ cleaned up after each run.
 '''
 import os
 import pkgutil
+import shutil
 import sys
 
 from publish.lib.manifest import (get_scraper_names, get_scraper_entrypoints)
@@ -56,15 +57,22 @@ def main():
 
     workspace = get_or_create_workspace(scraper_name)
 
+    fail = False
     for task in ['scrape', 'transform', 'load']:
         if should_run_task(task) and task in entry_points:
             print "*" * 30, "Running {}".format(task)
             try:
                 entry_points[task](workspace)
             except Exception as e:
+                fail = True
+
                 # TODO: Log e and notify someone...
                 import traceback
                 print traceback.format_exc()
 
 
+    if not fail and len(sys.argv) == 2:
+        # Cleanup the workspace ready for the next run only if we succeeded
+        # so there's some forensic info for debugging
+        shutil.rmtree(workspace)
 
