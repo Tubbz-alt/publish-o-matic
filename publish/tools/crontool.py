@@ -35,3 +35,9 @@ def main():
         hour, minute = get_random_hours_and_minutes()
         crontime = "{} {} * * * {}".format(minute, hour, cli)
         print crontime
+
+    switch = "{dms} --check 24"\
+            .format(dms=dmswitch)
+    hour, minute = get_random_hours_and_minutes()
+    crontime = "0 0 * * * {}".format(switch)
+    print crontime
