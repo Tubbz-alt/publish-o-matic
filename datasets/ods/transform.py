@@ -14,8 +14,6 @@ def datasets():
     input_file = DATA_DIR/'dataset.metadata.json'
     metadata = input_file.json_load()
     for dataset in metadata:
-        if dataset['name'].startswith('ods'):
-            dataset['name'] = dataset['name'][4:]
         directory = DATA_DIR / dataset['name']
         yield directory, input_file, dataset
 
