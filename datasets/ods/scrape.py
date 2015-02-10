@@ -7,11 +7,13 @@ import sys
 import urllib
 
 import ffs
-from lxml.html import fromstring
+from lxml.html import fromstring, tostring
 import requests
 import slugify
 
-from publish.lib.helpers import download_file
+from publish.lib.helpers import download_file, to_markdown, remove_tables_from_dom
+
+
 
 DATA_DIR = None
 
@@ -55,10 +57,13 @@ def fetch_dataset_metadata(url):
 
     dom = _astree(url)
     title = dom.cssselect('h1.documentFirstHeading')[0].text_content().strip()
-    print title
 
-    description_elements = [e.text_content() for e in dom.cssselect('#parent-fieldname-text')[0] if e.tag != 'table']
-    description = "\n".join(description_elements).strip()
+    # We can't strip the tables out of the full-dom because we want to get the resources.
+    # For now we'll build a new DOM using the HTML we want.
+    desc_html = tostring(dom.cssselect('#parent-fieldname-text')[0])
+    desc_dom = fromstring(desc_html)
+    remove_tables_from_dom(desc_dom)
+    description = to_markdown(tostring(desc_dom))
 
     metadata = dict(
         url=url,
@@ -67,7 +72,7 @@ def fetch_dataset_metadata(url):
         name=slugify.slugify(title).lower()
     )
     resources = []
-
+    appended_urls = []
     resource_rows = dom.cssselect('table.listing tbody tr')
     resource_rows = [r for r in resource_rows if r.text_content().find('File Description') == -1]
 
@@ -87,7 +92,12 @@ def fetch_dataset_metadata(url):
                 'name': name.text_content().strip(),
                 'description': description.text_content().strip()
             }
-            print resource
+
+            if resource['url'] in appended_urls:
+                print "Already have a resource pointing to {}".format(resource['url'])
+                continue
+            appended_urls.append(resource['url'])
+
             resources.append(resource)
     except ValueError: # Sometimes there are more columns
         for row in resource_rows:
@@ -112,6 +122,11 @@ def fetch_dataset_metadata(url):
             if excel:
                 url = excel.cssselect('a')[0].get('href')
 
+            if url in appended_urls:
+                print "Already have a resource pointing to {}".format(url)
+                continue
+
+            appended_urls.append(url)
             try:
                 resource = {
                     'url': url,

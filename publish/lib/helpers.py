@@ -1,3 +1,4 @@
+import html2text
 import requests
 import requests_cache
 
@@ -10,3 +11,11 @@ def download_file(url, target_file):
                     f.write(chunk)
                     f.flush()
         return target_file
+
+
+def remove_tables_from_dom(dom):
+    for bad in dom.xpath("//table"):
+        bad.getparent().remove(bad)
+
+def to_markdown(text):
+    return html2text.html2text(text)

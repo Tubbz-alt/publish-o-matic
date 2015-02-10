@@ -34,7 +34,6 @@ def add_metadata_to_ods_datasets():
 
         # Remove (PDF, 14.6kB) from each resource as it is describing the size of the
         # files once pulled out of the .zip
-        new_resources = []
         resources = metadata['resources']
         for r in resources:
             m = matcher.match(r['description'])

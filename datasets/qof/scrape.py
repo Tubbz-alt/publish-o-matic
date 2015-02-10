@@ -66,13 +66,13 @@ def qof_dataset(url):
     for gran in alternative_granularities:
         print 'Granularity', gran
         dataset['resources'] += _hscic_resources_from_tree(_astree(gran))
-        
+
     return dataset
 
 def find_qof_datasets():
     qof_tree = _astree(QOF_ROOT)
     all_datasets = qof_tree.cssselect('h3 a')
-    interesting = sorted([a.get('href') for a in all_datasets 
+    interesting = sorted([a.get('href') for a in all_datasets
                    if re.match(r'^The Quality and Outcomes Framework [\d]{4}-[\d]{2}$', a.text_content())])
 
     datasets = []
@@ -96,7 +96,7 @@ def retrieve_qof_datasets(datasets):
         if metadata_file:
             metadata_file.truncate()
         metadata_file << json.dumps(dataset, indent=2)
-            
+
 
 def main():
     datasets = find_qof_datasets()
