@@ -34,7 +34,8 @@ setup(
         "urlhelp==0.0.1",
         "dc==0.0.1",
         "ffs==0.0.8",
-        "dmswitch==0.0.1"
+        "dmswitch==0.0.1",
+        "requests-cache==0.4.9"
     ],
     entry_points = {
         'console_scripts': [

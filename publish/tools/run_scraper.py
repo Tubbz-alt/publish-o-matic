@@ -53,8 +53,13 @@ def main():
         usage("Could not find scraper '{}'".format(scraper_name))
         return sys.exit(1)
 
-    entry_points = get_scraper_entrypoints(scraper_name)
 
+    if os.environ.get('REQ_DEV') == "1":
+        import requests_cache
+        print "Installing requests cache"
+        requests_cache.install_cache('scraper_cache', expire_after=84200)
+
+    entry_points = get_scraper_entrypoints(scraper_name)
     workspace = get_or_create_workspace(scraper_name)
 
     fail = False
