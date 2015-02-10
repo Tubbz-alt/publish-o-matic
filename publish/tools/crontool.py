@@ -14,11 +14,13 @@ from publish.lib.manifest import get_scraper_names
 
 def get_launch_binary():
     this_location = sys.argv[0]
-    return os.path.join(os.path.dirname(this_location), "run_scraper")
+    path = os.path.join(os.path.dirname(this_location), "run_scraper")
+    return os.path.abspath(path)
 
 def get_dmswitch_binary():
     this_location = sys.argv[0]
-    return os.path.join(os.path.dirname(this_location), "dmswitch")
+    path = os.path.join(os.path.dirname(this_location), "dmswitch")
+    return os.path.abspath(path)
 
 def get_random_hours_and_minutes():
     random.seed()
