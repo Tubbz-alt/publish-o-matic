@@ -79,5 +79,6 @@ def main():
     if not fail and len(sys.argv) == 2:
         # Cleanup the workspace ready for the next run only if we succeeded
         # so there's some forensic info for debugging
-        shutil.rmtree(workspace)
+        if os.path.exists(workspace):
+            shutil.rmtree(workspace)
 
