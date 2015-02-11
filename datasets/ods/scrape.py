@@ -1,8 +1,10 @@
 """
 Scrape ODS data from the HSCIC
 """
+import hashlib
 import json
 import os
+import re
 import sys
 import urllib
 
@@ -11,17 +13,12 @@ from lxml.html import fromstring, tostring
 import requests
 import slugify
 
+from datasets.ods.info import DATASETS
 from publish.lib.helpers import download_file, to_markdown, remove_tables_from_dom
 
+PREFIX = "XODS"
 
-
-DATA_DIR = None
-
-DOWNLOADS = 'http://systems.hscic.gov.uk/data/ods/datadownloads/index'
-
-class Error(Exception):
-    def __init__(self, msg):
-        Exception.__init__(self, '\n\n\n{0}\n\n\n'.format(msg))
+title_matcher = re.compile('^(.*)\((.*), .*\)$')
 
 def _astree(url):
     """
@@ -35,174 +32,191 @@ def _astree(url):
     dom.make_links_absolute(url)
     return dom
 
-def check_sanity_of(metadata):
+
+def process_link(link):
     """
-    We've just finished scraping, let's make sure we haven't scraped bullshit.
+    Get text and link from an anchor
     """
-    for dataset in metadata:
-        seen = []
-        new_resources = []
-        for resource in dataset['resources']:
-            if resource['url'] in seen:
-                continue
-            seen.append(resource['url'])
+    return link.text_content(), link.get('href')
 
-            new_resources.append(resource)
-        dataset['resources'] = new_resources
 
-    print len(dataset['resources'])
+def build_resource(date, text, link):
+    ext = link[-3:].upper()
 
-def fetch_dataset_metadata(url):
-    """
-    Given a URL, fetch the metadata and resources
-    from that page, and return it as a dict.
-    """
-    print "Scraping", url
+    description = text
 
-    dom = _astree(url)
-    title = dom.cssselect('h1.documentFirstHeading')[0].text_content().strip()
+    m = title_matcher.match(description)
+    if m:
+        description = m.groups(0)[0]
+        if  m.groups(0)[1] != ext:
+            ext = m.groups(0)[1]
 
-    # We can't strip the tables out of the full-dom because we want to get the resources.
-    # For now we'll build a new DOM using the HTML we want.
-    desc_html = tostring(dom.cssselect('#parent-fieldname-text')[0])
+    return {
+        'url': link,
+        "name": link.split('/')[-1],
+        "format": ext,
+        "description": description.strip()
+    }
+
+
+def build_desc_from_dom(desc_html):
     desc_dom = fromstring(desc_html)
     remove_tables_from_dom(desc_dom)
-    description = to_markdown(tostring(desc_dom))
+    return to_markdown(tostring(desc_dom))
 
-    metadata = dict(
-        url=url,
-        title=title,
-        description=description,
-        name=slugify.slugify(title).lower()
-    )
-    resources = []
-    appended_urls = []
-    resource_rows = dom.cssselect('table.listing tbody tr')
-    resource_rows = [r for r in resource_rows if r.text_content().find('File Description') == -1]
+def download_and_hash_file(dataset_name, url):
+    folder = DATA_DIR / dataset_name
+    folder.mkdir()
 
-    try:
-        for row in resource_rows:
+    hash_of_url = hashlib.sha224(url).hexdigest()
+    print download_file(url, os.path.join(folder, hash_of_url))
 
-            if 'haandsa' in url:
-                try:
-                    description, name, created, _ = row
-                except ValueError:
-                    description, name, created = row
-            else:
-                name, description, created = row
 
-            resource = {
-                'url': name.cssselect('a')[0].get('href'),
-                'name': name.text_content().strip(),
-                'description': description.text_content().strip()
-            }
+###############################################################################
+# Multi-datasets on a single page.... ugh
+###############################################################################
+def build_dataset(header, desc, table_rows):
+    desc_html = to_markdown("\n".join(desc))
+    metadata = {
+        "name": "{}-{}".format(PREFIX.lower(), slugify.slugify(header).lower()),
+        "title": u"{} - {}".format(PREFIX, header),
+        "notes": desc_html,
+        "coverage_beginning_date": "",
+        "coverage_ending_date": "",
+        "frequency": "",
+        "tags": ["ODS", "Organisation Data Service"],
+        "resources": []
+    }
 
-            if resource['url'] in appended_urls:
-                print "Already have a resource pointing to {}".format(resource['url'])
-                continue
-            appended_urls.append(resource['url'])
+    date_string = ""
 
-            resources.append(resource)
-    except ValueError: # Sometimes there are more columns
-        for row in resource_rows:
-            excel = None
+    for row in table_rows:
 
-            print len(row), [r.text_content() for r in row]
-            if len(row) == 4:
-                name, full, excel, created = row
-            elif len(row) == 3:
-                name, full, created = row
-
-            resource = {
-                'url': full.cssselect('a')[0].get('href'),
-                'name': 'Full ' + name.text_content().strip(),
-                'description': name.text_content().strip()
-            }
-            resources.append(resource)
-            if excel is not None and excel.text_content().strip() == 'N/A':
+        for cell in row:
+            link = cell.cssselect('a')
+            if not len(link):
+                date_string = cell.text_content().strip()
                 continue
 
-            url = full.cssselect('a')[0].get('href')
-            if excel is not None:
-                url = excel.cssselect('a')[0].get('href')
+            text = link[0].text_content().strip()
+            href = link[0].get('href')
 
-            if url in appended_urls:
-                print "Already have a resource pointing to {}".format(url)
-                continue
+        metadata["resources"].append(build_resource(date_string, text, href))
 
-            appended_urls.append(url)
-            try:
-                resource = {
-                    'url': url,
-                    'name': 'Excel ' + name.text_content().strip(),
-                    'description': name.text_content().strip()
-                }
-            except IndexError:
-                import pdb;pdb.set_trace()
-                print row
-            resources.append(resource)
-
-    metadata['resources'] = resources
     return metadata
 
-def fetch_ods_metadata():
+def process_multi(dataset):
     """
-    * Fetch the list of downloads from the download index
-    * Iterate through them gathering metadata on each
-    * Write to a file as one dataset per "Download"
+    Multiple datasets on one page, so we'll track them with:
+        a H3 for header
+        followed by p tags
+        until we find the table
     """
-    dom = _astree(DOWNLOADS)
+    dom = _astree(dataset['url']).cssselect("#parent-fieldname-text")[0]
 
-    downloads = dom.cssselect('table.listing a.internal-link')
+    datasets = []
 
-    # Get a list of URLs to detail pages, there are duplicates.
-    categories = list(set(a.get('href') for a in downloads))
+    h3 = None
+    desc = []
+    table_rows = None
 
-    #metadata = [fetch_dataset_metadata(categories[4])]
-    metadata = [fetch_dataset_metadata(url) for url in categories]
-    check_sanity_of(metadata)
-    metafile = DATA_DIR/'dataset.metadata.json'
-    if metafile:
-        metafile.truncate()
-    metafile << json.dumps(metadata, indent=2)
-    print "Wrote metadata file to ", metafile
+    for element in dom:
+        if element.tag.upper() == "H3":
+            if h3 and table_rows:
+                datasets.append(build_dataset(h3, desc, table_rows))
+            h3 = element.text_content().strip()
+            desc = []
+            table_rows = None
+            continue
+        elif element.tag.upper() in ["P", "DIV"] :
+            desc.append(element.text_content().encode('utf8'))
+        elif element.tag.upper() == "UL":
+            desc.append(tostring(element))
+        elif element.tag.upper() == "TABLE":
+            table_rows = element.cssselect("tr")[1:]
 
-def fetch_ods_data():
-    """
-    Given the metadata we've scraped from ODS, let's now download the
-    data files!
-    """
-    metafile = DATA_DIR/'dataset.metadata.json'
-    metadata = metafile.json_load()
-    for dataset in metadata:
-        downloaded = []
+    if h3 and table_rows:
+        datasets.append(build_dataset(h3, desc, table_rows))
 
-        dataset_dir = DATA_DIR / dataset['name']
-        dataset_dir.mkdir()
+    return datasets
 
-        for resource in dataset['resources']:
-            parts = resource['url'].split('/')
-            if parts[-2] == 'xls':
-                target = os.path.join(dataset_dir, "xls_{}".format(parts[-1]) )
-            else:
-                target = os.path.join(dataset_dir, parts[-1] )
+###############################################################################
 
-            if resource['url'] in downloaded:
-                print "Recently downloaded {} so not downloading again".format(resource['url'])
-                continue
-            print "Fetching {}".format(resource['url'])
-            download_file(resource['url'], target)
 
-            downloaded.append(resource['url'])
-    return
+def process_dataset(dataset):
+    print "Processing '{}'".format(dataset['url'])
+
+    if dataset.get("multi", False):
+        return process_multi(dataset)
+
+    dom = _astree(dataset['url'])
+    title = dom.xpath(dataset['title'])[0].text_content().strip()
+
+    desc_html = "\n".join(tostring(dom.xpath(x)[0]) for x in dataset['description'])
+    description = build_desc_from_dom(desc_html)
+
+    metadata = {
+        "name": "{}-{}".format(PREFIX.lower(), slugify.slugify(title).lower()),
+        "title": "{} - {}".format(PREFIX, title),
+        "notes": description,
+        "coverage_beginning_date": "",
+        "coverage_ending_date": "",
+        "frequency": "",
+        'tags': ["ODS", "Organisation Data Service"]
+    }
+
+    resources = []
+
+
+    loose_links = dom.cssselect('p a')
+    if len(loose_links) > 0:
+        # ""
+        for loose in loose_links:
+            link = loose.get('href')
+            if link.startswith("http://systems.hscic.gov.uk/data/ods/datadownloads"):
+                text, link = process_link(loose)
+                resources.append(build_resource("", text, link))
+
+    for k, cell_types in dataset['data'].iteritems():
+        table = dom.xpath(k)[0]
+        rows = table.cssselect('tr')[1:]
+
+        for row in rows:
+            date_pos = cell_types.get("date", -1)
+            if date_pos != -1:
+                date = row[cell_types["date"]].text_content().strip()
+
+            for x in xrange(0, len(row)):
+                if x == date_pos:
+                    continue
+
+                links = row[x].cssselect("a")
+                if len(links) > 0:
+                    # Ignore empty cells that are usefully provided.
+                    text, link = process_link(links[0])
+
+            resources.append(build_resource(date, text, link))
+
+    metadata['resources'] = resources
+    return [metadata]
+
 
 def main(workspace):
     global DATA_DIR
     DATA_DIR = ffs.Path(workspace) / 'data'
 
-    fetch_ods_metadata()
-    fetch_ods_data()
-    return 0
+    output_datasets = []
+    for d in DATASETS:
+        output_datasets.extend(process_dataset(d))
 
-if __name__ == '__main__':
-    sys.exit(main(ffs.Path.here()))
+    print [len(d['resources']) for d in output_datasets]
+    #for d in output_datasets:
+    #    for r in d['resources']:
+    #        download_and_hash_file(d['name'], r['url'])
+
+    metafile = DATA_DIR / "dataset.metadata.json"
+    if metafile:
+        metafile.truncate()
+    metafile << json.dumps(output_datasets, indent=2)
+
+    return 0

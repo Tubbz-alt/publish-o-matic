@@ -1,3 +1,4 @@
+import hashlib
 import html2text
 import requests
 import requests_cache
@@ -18,4 +19,4 @@ def remove_tables_from_dom(dom):
         bad.getparent().remove(bad)
 
 def to_markdown(text):
-    return html2text.html2text(text)
+    return html2text.html2text(text.decode('latin-1'))
