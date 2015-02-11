@@ -16,7 +16,7 @@ import slugify
 from datasets.ods.info import DATASETS
 from publish.lib.helpers import download_file, to_markdown, remove_tables_from_dom
 
-PREFIX = "XODS"
+PREFIX = "ODS"
 
 title_matcher = re.compile('^(.*)\((.*), .*\)$')
 
