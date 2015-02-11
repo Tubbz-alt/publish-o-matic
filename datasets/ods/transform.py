@@ -39,6 +39,9 @@ def add_metadata_to_ods_datasets():
             m = matcher.match(r['description'])
             if m:
                 r['description'] = m.groups(0)[0]
+            m = matcher.match(r['name'])
+            if m:
+                r['name'] = m.groups(0)[0]
         new_metadata.append(metadata)
 
     # Save new metadata

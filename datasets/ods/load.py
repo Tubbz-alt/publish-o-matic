@@ -1,6 +1,7 @@
 """
 Load the ODS datasets into a CKAN instance
 """
+import os
 import sys
 
 import dc
@@ -16,19 +17,29 @@ def datasets():
         directory = DATA_DIR / dataset['name'][4:]
         yield directory, input_file, dataset
 
+def get_local_filename(dataset_dir, url):
+    parts = url.split('/')
+    if parts[-2] == 'xls':
+        target = os.path.join(dataset_dir, "xls_{}".format(parts[-1]) )
+    else:
+        target = os.path.join(dataset_dir, parts[-1] )
+    return target
+
 def load_ods():
     for directory, metadata_file, metadata in datasets():
+
         resources = [
             dict(
-                description=r['description'],
+                description=r['name'],
                 name=r['url'].split('/')[-1],
-                #format=r['filetype'],
-                upload=open(str(directory/r['url'].split('/')[-1]), 'r')
+                format=r['url'][-4:].upper(),
+                upload=open(get_local_filename(directory, r['url']), 'r')
             )
             for r in metadata['resources']
         ]
 
         print 'Creating', metadata['title'], metadata['name']
+
         dc.Dataset.create_or_update(
             name=metadata['name'],
             title=metadata['title'],

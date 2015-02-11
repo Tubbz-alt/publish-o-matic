@@ -40,13 +40,17 @@ def check_sanity_of(metadata):
     We've just finished scraping, let's make sure we haven't scraped bullshit.
     """
     for dataset in metadata:
+        seen = []
+        new_resources = []
         for resource in dataset['resources']:
-            if not resource['url']:
-                print dataset['title']
-                print dataset['url']
-                print resource
-                raise Error('You scraped a resource without noting the URL Larry')
-    return
+            if resource['url'] in seen:
+                continue
+            seen.append(resource['url'])
+
+            new_resources.append(resource)
+        dataset['resources'] = new_resources
+
+    print len(dataset['resources'])
 
 def fetch_dataset_metadata(url):
     """
@@ -119,7 +123,7 @@ def fetch_dataset_metadata(url):
                 continue
 
             url = full.cssselect('a')[0].get('href')
-            if excel:
+            if excel is not None:
                 url = excel.cssselect('a')[0].get('href')
 
             if url in appended_urls:
@@ -154,6 +158,7 @@ def fetch_ods_metadata():
     # Get a list of URLs to detail pages, there are duplicates.
     categories = list(set(a.get('href') for a in downloads))
 
+    #metadata = [fetch_dataset_metadata(categories[4])]
     metadata = [fetch_dataset_metadata(url) for url in categories]
     check_sanity_of(metadata)
     metafile = DATA_DIR/'dataset.metadata.json'
@@ -174,18 +179,18 @@ def fetch_ods_data():
 
         dataset_dir = DATA_DIR / dataset['name']
         dataset_dir.mkdir()
+
         for resource in dataset['resources']:
-            print resource['url']
             parts = resource['url'].split('/')
             if parts[-2] == 'xls':
                 target = os.path.join(dataset_dir, "xls_{}".format(parts[-1]) )
             else:
                 target = os.path.join(dataset_dir, parts[-1] )
 
-            print target, ""
             if resource['url'] in downloaded:
                 print "Recently downloaded {} so not downloading again".format(resource['url'])
                 continue
+            print "Fetching {}".format(resource['url'])
             download_file(resource['url'], target)
 
             downloaded.append(resource['url'])
