@@ -37,7 +37,10 @@ def usage(error):
     sys.stderr.write("\n\n")
 
 def get_or_create_workspace(name):
-    return '/tmp/{}'.format(name)
+    path = '/tmp/{}'.format(name)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
 
 def main():
     """

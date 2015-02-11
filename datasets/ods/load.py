@@ -1,5 +1,5 @@
 """
-Load the ASCODF datasets into a CKAN instance
+Load the ODS datasets into a CKAN instance
 """
 import sys
 
