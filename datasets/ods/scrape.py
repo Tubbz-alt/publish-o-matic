@@ -77,6 +77,7 @@ def download_and_hash_file(dataset_name, url):
 ###############################################################################
 def build_dataset(header, desc, table_rows):
     desc_html = to_markdown("\n".join(desc))
+
     metadata = {
         "name": "{}-{}".format(PREFIX.lower(), slugify.slugify(header).lower()),
         "title": u"{} - {}".format(PREFIX, header),
@@ -129,7 +130,7 @@ def process_multi(dataset):
             table_rows = None
             continue
         elif element.tag.upper() in ["P", "DIV"] :
-            desc.append(element.text_content().encode('utf8'))
+            desc.append(element.text_content().encode("utf8"))
         elif element.tag.upper() == "UL":
             desc.append(tostring(element))
         elif element.tag.upper() == "TABLE":
@@ -209,14 +210,15 @@ def main(workspace):
     for d in DATASETS:
         output_datasets.extend(process_dataset(d))
 
-    print [len(d['resources']) for d in output_datasets]
-    #for d in output_datasets:
-    #    for r in d['resources']:
-    #        download_and_hash_file(d['name'], r['url'])
-
     metafile = DATA_DIR / "dataset.metadata.json"
     if metafile:
         metafile.truncate()
     metafile << json.dumps(output_datasets, indent=2)
+
+    #for d in output_datasets:
+        #for r in d['resources']:
+            #download_and_hash_file(d['name'], r['url'])
+
+
 
     return 0

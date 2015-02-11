@@ -1,14 +1,6 @@
 
 DATASETS = [
     {
-        "url": "http://systems.hscic.gov.uk/data/ods/datadownloads/quartamend",
-        "multi": True
-    },
-    {
-        "url": "http://systems.hscic.gov.uk/data/ods/datadownloads/monthamend",
-        "multi": True
-    },
-    {
         "url": "http://systems.hscic.gov.uk/data/ods/datadownloads/othernhs",
         "multi": True
     },
@@ -71,6 +63,15 @@ DATASETS = [
                 "date": 2
             }
         }
-    }
+    },
+    {
+        "url": "http://systems.hscic.gov.uk/data/ods/datadownloads/quartamend",
+        "multi": True
+    },
+    {
+        "url": "http://systems.hscic.gov.uk/data/ods/datadownloads/monthamend",
+        "multi": True
+    },
+
 ]
 

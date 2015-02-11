@@ -1,6 +1,7 @@
 """
 Load the ODS datasets into a CKAN instance
 """
+import hashlib
 import os
 import sys
 
@@ -14,20 +15,15 @@ def datasets():
     input_file = DATA_DIR/'dataset.metadata.json'
     metadata = input_file.json_load()
     for dataset in metadata:
-        directory = DATA_DIR / dataset['name'][4:]
+        directory = DATA_DIR / dataset['name']
         yield directory, input_file, dataset
 
 def get_local_filename(dataset_dir, url):
-    parts = url.split('/')
-    if parts[-2] == 'xls':
-        target = os.path.join(dataset_dir, "xls_{}".format(parts[-1]) )
-    else:
-        target = os.path.join(dataset_dir, parts[-1] )
-    return target
+    x = os.path.join(dataset_dir, hashlib.sha224(url).hexdigest())
+    return x
 
 def load_ods():
     for directory, metadata_file, metadata in datasets():
-
         resources = [
             dict(
                 description=r['name'],
@@ -45,7 +41,7 @@ def load_ods():
             title=metadata['title'],
             state='active',
             licence_id='ogl',
-            notes=metadata['description'],
+            notes=metadata['notes'],
             #url=metadata['source'],
             tags=dc.tags(*metadata['tags']),
             resources=resources,
@@ -66,7 +62,6 @@ def group_ods():
 
         if [g for g in dataset['groups'] if g['name'].lower() == 'ods']:
             print 'Already in group', g
-
         else:
             dc.ckan.action.member_create(
                 id='ods',
