@@ -1,11 +1,21 @@
 """
-Load the QOF datasets into a CKAN instance
+Load the CCGOIS datasets into a CKAN instance
 """
 import dc
 import json
 import slugify
 
+def make_name_from_title(title):
+    # For some reason, we're finding duplicate names
+    name = slugify.slugify(title).lower()[:99]
+    if not name.startswith('ccgois-'):
+        name = u"ccgois-{}".format(name)
+    return name
+
+
 def load_ccgois(datasets):
+    # TODO: Clarify with ntoll the reason behind skipping the first 16 datasets
+    # here (but they are not skipped in group_ccgois).
     for metadata in datasets[16:]:
         resources = [
             dict(
@@ -16,10 +26,11 @@ def load_ccgois(datasets):
             )
             for r in metadata['sources']
         ]
-        metadata['title'] = 'CCGOIS - ' + metadata['title']
-        print 'Creating', metadata['title']
+        metadata['title'] = u'CCGOIS - {}'.format(metadata['title'])
+        metadata['name'] = make_name_from_title(metadata['title'])
+        print 'Creating {}:{}'.format(metadata['name'], metadata['title'])
         dc.Dataset.create_or_update(
-            name=slugify.slugify(metadata['title']).lower()[:99],
+            name=metadata['name'],
             title=metadata['title'],
             state='active',
             license_id='uk-ogl',
@@ -49,12 +60,17 @@ def load_ccgois(datasets):
 
 def group_ccgois(datasets):
     for metadata in datasets:
-        metadata['title'] = 'CCGOIS - ' + metadata['title']
-        dataset_name = slugify.slugify(metadata['title']).lower()[:99]
-        dataset = dc.ckan.action.package_show(id=dataset_name)
+        dataset_name = make_name_from_title(metadata['title'])
+
+        try:
+            dataset = dc.ckan.action.package_show(id=dataset_name)
+        except:
+            print "Failed to find dataset: {}".format(dataset_name)
+            print "Can't add to group"
+            continue
 
         if [g for g in dataset.get('groups', []) if g['name'] == 'ccgois']:
-            print 'Already in group', g
+            print 'Already in group', g['name']
         else:
             dc.ckan.action.member_create(
                 id='ccgois',
@@ -68,7 +84,7 @@ def main(workspace):
     datasets = json.load(open('ccgois_indicators.json'))
     dc.ensure_publisher('hscic')
     dc.ensure_group('ccgois')
-    #load_ccgois(datasets)
+    load_ccgois(datasets)
     group_ccgois(datasets)
 
 if __name__ == '__main__':

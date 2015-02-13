@@ -1349,6 +1349,7 @@ Not applicable
 }
 
 import os
+import ffs
 
 def get_metadata_file(filename):
     root = os.path.dirname(__file__)
@@ -1356,6 +1357,8 @@ def get_metadata_file(filename):
     return os.path.abspath(f)
 
 def main(workspace):
+    root = ffs.Path(workspace)
+
     all_indicators = json.load(open(get_metadata_file('data/indicators.json')))
     ccgois_indicators = []
     found = []
@@ -1381,7 +1384,5 @@ def main(workspace):
     for k in CCGOIS_INDICATORS:
         if k not in found:
             raise ValueError('{} not found')
-    json.dump(ccgois_indicators, open('ccgois_indicators.json', 'wb'), indent=2)
+    json.dump(ccgois_indicators, open(os.path.join(root,'ccgois_indicators.json'), 'wb'), indent=2)
 
-if __name__ == '__main__':
-    main(None)

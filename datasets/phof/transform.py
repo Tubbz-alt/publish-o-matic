@@ -1,5 +1,5 @@
 """
-Make transformations/adjustments/reorganisations of the ASCOF data
+No longer required/used
 """
 import datetime
 import json

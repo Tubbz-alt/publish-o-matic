@@ -1,5 +1,7 @@
 """
-Load the ASCODF datasets into a CKAN instance
+No longer required/used
+
+Load the PHOF datasets into a CKAN instance
 """
 import sys
 
