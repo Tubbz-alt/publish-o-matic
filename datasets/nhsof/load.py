@@ -7,10 +7,13 @@ import ffs
 import json
 import slugify
 
+from publish.lib.metadata import get_resource_file
+
 def load_ccgois(datasets):
     counter = 0
-    for metadata in datasets[43:]:
-        print counter
+
+    # There are only 35 datasets from the scrape, why are we skipping 43.
+    for metadata in datasets: #[43:]:
         counter += 1
         resources = []
         for r in metadata['sources']:
@@ -21,6 +24,8 @@ def load_ccgois(datasets):
                 'format': r['filetype'],
                 'upload': upload,
             })
+
+        print "Resources ready for upload"
         metadata['title'] = 'NHSOF - ' + metadata['title']
         print 'Creating', metadata['title']
         dc.Dataset.create_or_update(
@@ -48,17 +53,22 @@ def load_ccgois(datasets):
 
             ]
         )
-    return
+    return counter
 
 def group_ccgois(datasets):
     for metadata in datasets:
         metadata['title'] = 'NHSOF - ' + metadata['title']
         dataset_name = slugify.slugify(metadata['title']).lower()[:99]
         print dataset_name
-        dataset = dc.ckan.action.package_show(id=dataset_name)
+
+        try:
+            dataset = dc.ckan.action.package_show(id=dataset_name)
+        except:
+            print u"Could not find dataset: {}".format(dataset_name)
+            continue
 
         if [g for g in dataset.get('groups', []) if g['name'] == 'nhsof']:
-            print 'Already in group', g
+            print 'Already in group', g['name']
         else:
             dc.ckan.action.member_create(
                 id='nhsof',
@@ -69,23 +79,24 @@ def group_ccgois(datasets):
     return
 
 
-def get_metadata_file(filename):
-    # TODO: Move into a helper
-    root = os.path.dirname(__file__)
-    f = os.path.join(root, os.path.pardir, os.path.pardir, "metadata", filename)
-    return os.path.abspath(f)
 
 DATA_DIR = None
 
 def main(workspace):
     global DATA_DIR
     DATA_DIR = ffs.Path(workspace) / 'data'
-    datasets = json.load(open(DATA_DIR / 'data/nhsof_metadata_indicators.json', 'r'))
+    DATA_DIR.mkdir()
+
+    datasets = json.load(get_resource_file(DATA_DIR / 'nhsof_metadata_indicators.json'))
+    print "Ensuring publisher"
     dc.ensure_publisher('hscic')
+    print "Ensuring group"
     dc.ensure_group('nhsof')
-    #dc.ensure_group('hscic')
-    #load_ccgois(datasets)
-    group_ccgois(datasets)
+    wrote = load_ccgois(datasets)
+    if wrote:
+        group_ccgois(datasets)
+    else:
+        print "Created/processed no datasets ..."
 
 if __name__ == '__main__':
     main(ffs.Path.here())

@@ -1347,16 +1347,16 @@ Not applicable
         'nhs_of_indicators': '5.2 ii',
     },
 }
-
+import ffs
 import os
+from publish.lib.metadata import get_resource_file
 
-def get_metadata_file(filename):
-    root = os.path.dirname(__file__)
-    f = os.path.join(root, os.path.pardir, os.path.pardir, "metadata", filename)
-    return os.path.abspath(f)
 
 def main(workspace):
-    all_indicators = json.load(open(get_metadata_file('data/indicators.json'),'r'))
+    root = ffs.Path(workspace) / 'data'
+    root.mkdir()
+
+    all_indicators = json.load(get_resource_file('data/indicators.json'))
     ccgois_indicators = []
     found = []
     for indicator in all_indicators:
@@ -1381,7 +1381,8 @@ def main(workspace):
     for k in CCGOIS_INDICATORS:
         if k not in found:
             raise ValueError('{} not found')
-    json.dump(ccgois_indicators, open(get_metadata_file('data/ccgois_indicators.json'),'wb'), indent=2)
 
-if __name__ == '__main__':
-    main(ffs.Path.here())
+    f = os.path.join(root, "nhsof_metadata_indicators.json")
+    json.dump(ccgois_indicators, open(f,'wb'), indent=2)
+
+
