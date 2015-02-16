@@ -27,6 +27,10 @@ def main(workspace):
         for r in dataset["resources"]:
             name = hashlib.sha224(r['url']).hexdigest()
             target = os.path.join(DATA_DIR, name)
+            if os.path.exists(target):
+                print "Target exists..."
+                continue
+
             download_file(r['url'], target)
 
 

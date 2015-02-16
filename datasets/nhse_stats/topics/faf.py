@@ -79,7 +79,6 @@ def process_latest(datasets, latest):
 
 def string_to_date(s, start=True):
 
-
     m = DATE_RE.match(s)
     if not m:
         return ""
