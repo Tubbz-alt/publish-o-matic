@@ -109,11 +109,11 @@ def process_dates(datasets):
 
         dataset["coverage_start_date"] = start_date
         dataset["coverage_end_date"] = end_date
-        dataset["frequency"] = "monthly"
+        dataset["frequency"] = "Monthly"
 
         qrtrs = [1 for r in dataset['resources'] if 'Quarter' in r['description']]
         if any(qrtrs):
-            dataset["frequency"] = "quarterly"
+            dataset["frequency"] = "Quarterly"
 
 def scrape(workspace):
     print "Scraping FAF with workspace {}".format(workspace)
