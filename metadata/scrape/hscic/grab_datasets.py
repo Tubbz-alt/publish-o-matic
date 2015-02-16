@@ -9,8 +9,11 @@ import string
 import json
 import logging
 import requests
+import requests_cache
 import urllib
 import html2text
+import re
+from lxml.html import fromstring
 from bs4 import BeautifulSoup
 from urlparse import urlparse
 
@@ -19,6 +22,7 @@ logging.basicConfig(filename='datasets.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     level=logging.DEBUG)
 
+requests_cache.install_cache('scraper_cache', expire_after=84200)
 
 def get_query_dict(query):
     """
@@ -100,13 +104,15 @@ def get_keywords(cache):
     Will attempt to retrieve a list of keywords and associated product_ids (the
     unique dataset identifier).
     """
-    url_template = 'http://www.hscic.gov.uk/searchcatalogue?kwd={}&size=10&page=1#top'
+    url_template = "http://qa.gossinteractive.com/hscic/hscic/article/1576/Find-data?kwd={}&sort=Relevance&size=100&page=1"
+    #url_template = 'http://www.hscic.gov.uk/searchcatalogue?kwd={}&size=10&page=1#top'
     keywords = {}
     if os.path.isfile(cache):
         logging.info('Using cached records from {}'.format(cache))
         keywords = json.load(open(cache))
     else:
         for letter in string.ascii_lowercase:
+            print "", letter
             url = url_template.format(letter)
             logging.info('Requesting {}'.format(url))
             response = requests.get(url)
@@ -121,7 +127,9 @@ def get_keywords(cache):
                         spans = kids.find_all("span", "heading")
                         for item in spans:
                             keywords[item.text] = []
+    print "\tBuilding cache"
     for key in keywords:
+        print "\t\t{}".format(key)
         if not keywords[key]:
             url = url_template.format(urllib.quote(key))
             keywords[key] = get_datasets_from_paginated_results(url)
@@ -135,7 +143,8 @@ def get_topics(cache):
     Will attempt to retrieve a list of topics and associated product_ids (the
     unique dataset identifiers).
     """
-    url_template = 'http://www.hscic.gov.uk/searchcatalogue?topics=0%2f{}&size=100&page=1'
+    url_template = "http://qa.gossinteractive.com/hscic/hscic/article/1576/Find-data?topics=0%2f{}&sort=Relevance&size=100&page=1"
+    #url_template = 'http://www.hscic.gov.uk/searchcatalogue?topics=0%2f{}&size=100&page=1'
     topics = {}
     if os.path.isfile(cache):
         logging.info('Using cached records from {}'.format(cache))
@@ -154,6 +163,7 @@ def get_topics(cache):
                 for item in spans:
                     topics[item.text] = []
     for topic in topics:
+        print "", topic
         if not topics[topic]:
             url = url_template.format(urllib.quote(topic))
             topics[topic] = get_datasets_from_paginated_results(url)
@@ -167,15 +177,18 @@ def get_info_types(cache):
     Will attempt to retrieve a list of information types and associated
     product_ids.
     """
-    url_template = 'http://www.hscic.gov.uk/searchcatalogue?infotype=0%2f{}&size=100&page=1'
+    url_template = "http://qa.gossinteractive.com/hscic/hscic/article/1576/Find-data?infotype=0%2f{}&sort=Relevance&size=100&page=1"
+    #url_template = 'http://www.hscic.gov.uk/searchcatalogue?infotype=0%2f{}&size=100&page=1'
     info_types = {}
     if os.path.isfile(cache):
+        print "We have cached version of info_types"
         logging.info('Using cached records from {}'.format(cache))
         info_types = json.load(open(cache))
     else:
-        url = "http://www.hscic.gov.uk/searchcatalogue"
-        logging.info('Requesting {}'.format(url))
+        url = "http://qa.gossinteractive.com/hscic/hscic/article/1576/Find-data"
+        print 'Requesting {}'.format(url)
         response = requests.get(url)
+
         logging.info(response.status_code)
         if response.status_code < 400:
             html = response.text
@@ -200,22 +213,43 @@ def get_dataset(dataset_id, dataset, directory):
     about the dataset will extract all the things from the dataset's page on
     HSCIC.
     """
-    url_template = 'http://www.hscic.gov.uk/searchcatalogue?productid={}'
+
+    url_template = 'http://qa.gossinteractive.com/hscic/hscic/article/1576/Find-data?productid={}'
+    #url_template = 'http://www.hscic.gov.uk/searchcatalogue?productid={}'
     cache = os.path.join(directory, '{}.html'.format(dataset_id))
     html = ''
     url = url_template.format(dataset_id)
+
+    print "Getting dataset ... {}".format(dataset_id)
     if os.path.isfile(cache):
         logging.info('Using cached records from {}'.format(cache))
         html = open(cache).read()
     else:
         logging.info('Requesting {}'.format(url))
         response = requests.get(url)
-        logging.info(response.status_code)
         if response.status_code < 400:
             html = response.text
             with open(cache, 'wb') as output:
                 output.write(html.encode('utf-8'))
     if html:
+        # Look up the data for the dataset from the var jsonProduct JSON
+        # blob.
+        dom = fromstring(html)
+        jsonProductList = [d for d in dom.cssselect('script') if 'jsonProduct' in d.text_content()]
+        if jsonProductList:
+            elem = jsonProductList[0].text_content().strip()
+            key = "var jsonProduct ="
+            code = elem[elem.index(key) + len(key): -1]
+            try:
+                json.loads(code)
+                print "+ Managed to load jsonProduct on {}".format(dataset_id)
+            except:
+                print "- Data wasn't loadable in {}".format(dataset_id)
+                print code.encode('utf8')
+        else:
+            print "- Data is missing from dataset_id {}".format(dataset_id)
+
+        """
         soup = BeautifulSoup(html)
         title = soup.find(id='headingtext').text.strip()
         logging.info(title)
@@ -258,6 +292,7 @@ def get_dataset(dataset_id, dataset, directory):
         geo = [x.text for x in coverage]
         if geo:
             dataset['geographical_coverage'] = geo
+        """
         return dataset
     else:
         return None
@@ -269,11 +304,16 @@ if __name__ == '__main__':
     if not os.path.exists(directory):
         logging.info('Creating directory {}'.format(directory))
         os.makedirs(directory)
-    keywords = get_keywords(os.path.join(directory, 'keywords.json'))
-    topics = get_topics(os.path.join(directory, 'topics.json'))
+
+    print "Fetching keywords"
+    #keywords = get_keywords(os.path.join(directory, 'keywords.json'))
+    print "Fetching topics"
+    #topics = get_topics(os.path.join(directory, 'topics.json'))
+    print "Fetching information types"
     information_types = get_info_types(os.path.join(directory,
                                                     'info_types.json'))
     datasets = {}
+    """
     for k in keywords:
         for dataset in keywords[k]:
             if dataset in datasets:
@@ -293,6 +333,7 @@ if __name__ == '__main__':
                 datasets[dataset] = {
                     'topics': [t, ],
                 }
+    """
     for i in information_types:
         for dataset in information_types[i]:
             if dataset in datasets:
