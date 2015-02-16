@@ -107,8 +107,8 @@ def process_dates(datasets):
         start_date = string_to_date(dataset["resources"][-1]['description'])
         end_date = string_to_date(dataset["resources"][0]['description'], start=False)
 
-        dataset["coverage_beginning_date"] = start_date
-        dataset["coverage_ending_date"] = end_date
+        dataset["coverage_start_date"] = start_date
+        dataset["coverage_end_date"] = end_date
         dataset["frequency"] = "monthly"
 
         qrtrs = [1 for r in dataset['resources'] if 'Quarter' in r['description']]

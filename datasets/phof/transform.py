@@ -32,8 +32,8 @@ def add_metadata_to_ascof_datasets():
     metadata['summary'] = PHOF_SUMMARY
     metadata['source'] = 'http://www.phoutcomes.info/public-health-outcomes-framework'
 
-    metadata['coverage_beginning_date'] = '01/01/2000'
-    metadata['coverage_ending_date'] = '31/12/2013'
+    metadata['coverage_start_date'] = '01/01/2000'
+    metadata['coverage_end_date'] = '31/12/2013'
 
     metadata_file.truncate()
     metadata_file << json.dumps(metadata, indent=2)

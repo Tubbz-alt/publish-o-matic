@@ -82,8 +82,8 @@ def build_dataset(header, desc, table_rows):
         "name": "{}-{}".format(PREFIX.lower(), slugify.slugify(header).lower()),
         "title": u"{} - {}".format(PREFIX, header),
         "notes": desc_html,
-        "coverage_beginning_date": "",
-        "coverage_ending_date": "",
+        "coverage_start_date": "",
+        "coverage_end_date": "",
         "frequency": "",
         "tags": ["ODS", "Organisation Data Service"],
         "resources": []
@@ -160,8 +160,8 @@ def process_dataset(dataset):
         "name": "{}-{}".format(PREFIX.lower(), slugify.slugify(title).lower()),
         "title": "{} - {}".format(PREFIX, title),
         "notes": description,
-        "coverage_beginning_date": "",
-        "coverage_ending_date": "",
+        "coverage_start_date": "",
+        "coverage_end_date": "",
         "frequency": "",
         'tags': ["ODS", "Organisation Data Service"]
     }

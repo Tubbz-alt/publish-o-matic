@@ -28,8 +28,8 @@ def load_statistic(dataset, directory):
         resources=dataset["resources"],
         owner_org='nhs-england',
         extras=[
-            dict(key='coverage_beginning_date', value=dataset['coverage_beginning_date']),
-            dict(key='coverage_ending_date', value=dataset['coverage_ending_date']),
+            dict(key='coverage_start_date', value=dataset['coverage_start_date']),
+            dict(key='coverage_end_date', value=dataset['coverage_end_date']),
             dict(key='frequency', value=dataset['frequency']),
             #dict(key='publication_date', value=metadata['publication_date'])
         ]
