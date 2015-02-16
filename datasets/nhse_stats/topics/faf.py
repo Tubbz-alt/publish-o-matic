@@ -39,7 +39,7 @@ def process_block(p, title, description, current_year):
         "notes": description,
         "tags": ["Friends and Family", "Statistics", current_year, title.replace('&',' and ')],
         "resources": [],
-        "source": "http://www.england.nhs.uk/statistics/statistical-work-areas/friends-and-family-test"
+        "origin": "http://www.england.nhs.uk/statistics/statistical-work-areas/friends-and-family-test"
     }
 
     for resource in p.cssselect('a'):
@@ -99,7 +99,7 @@ def string_to_date(s, start=True):
         day = mend
 
     d = datetime.datetime(year=year, month=mnth, day=day)
-    return d.isoformat()
+    return d.strftime("%Y-%m-%d")
 
 def process_dates(datasets):
 

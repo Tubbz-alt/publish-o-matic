@@ -17,23 +17,33 @@ def load_statistic(dataset, directory):
         r['upload'] = open(os.path.join(directory, hash), 'r')
 
     print 'Creating', dataset['title'], dataset['name']
-    dc.Dataset.create_or_update(
-        name=dataset['name'],
-        title=dataset['title'],
-        state='active',
-        licence_id='ogl',
-        notes=dataset['notes'],
-        url=dataset['source'],
-        tags=dc.tags(*dataset['tags']),
-        resources=dataset["resources"],
-        owner_org='nhs-england',
-        extras=[
-            dict(key='coverage_start_date', value=dataset['coverage_start_date']),
-            dict(key='coverage_end_date', value=dataset['coverage_end_date']),
-            dict(key='frequency', value=dataset['frequency']),
-            #dict(key='publication_date', value=metadata['publication_date'])
-        ]
-    )
+    try:
+        extras = []
+        if dataset['coverage_start_date']:
+            extras.append(dict(key='coverage_start_date', value=dataset['coverage_start_date']))
+        if dataset['coverage_end_date']:
+            extras.append(dict(key='coverage_end_date', value=dataset['coverage_end_date']))
+        if dataset['frequency']:
+            extras.append(dict(key='frequency', value=dataset['frequency']))
+
+        dc.Dataset.create_or_update(
+            name=dataset['name'],
+            title=dataset['title'],
+            state='active',
+            licence_id='ogl',
+            notes=dataset['notes'],
+            url=dataset['origin'],
+            tags=dc.tags(*dataset['tags']),
+            resources=dataset["resources"],
+            owner_org='nhs-england',
+            extras=extras
+        )
+        return True
+    except Exception, e:
+        print "ERROR: Problem updating/creating dataset - {}".format(dataset['name'])
+        print e
+
+    return False
 
 def groups(dataset):
     dataset = dc.ckan.action.package_show(id=dataset["name"])
@@ -57,5 +67,5 @@ def main(workspace):
 
     datasets = json.load(open(os.path.join(DATA_DIR, "metadata.json"), "r"))
     for dataset in datasets:
-        load_statistic(dataset, DATA_DIR)
-        groups(dataset)
+        if load_statistic(dataset, DATA_DIR):
+            groups(dataset)
