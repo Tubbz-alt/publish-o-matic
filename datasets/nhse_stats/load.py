@@ -1,25 +1,61 @@
 """
-Scrapes the HTML and dumps all of the data into the workspace ready
-for the transform task to manipulate it into a format the CKAN can
-understand.
+Load the Statistic datasets into a CKAN instance
 """
+import hashlib
+import json
+import os
+import sys
+
+import dc
 import ffs
 
-DATA_DIR = None
 
 
-def load():
-    # Load the metadata in each directory of the DATA_DIR and process
-    # it.
-    for directory in DATA_DIR.ls():
-        print directory
+def load_statistic(dataset, directory):
+    for r in dataset['resources']:
+        hash = hashlib.sha224(r['url']).hexdigest()
+        r['upload'] = open(os.path.join(directory, hash), 'r')
 
+    print 'Creating', dataset['title'], dataset['name']
+    dc.Dataset.create_or_update(
+        name=dataset['name'],
+        title=dataset['title'],
+        state='active',
+        licence_id='ogl',
+        notes=dataset['notes'],
+        url=dataset['source'],
+        tags=dc.tags(*dataset['tags']),
+        resources=dataset["resources"],
+        owner_org='nhs-england',
+        extras=[
+            dict(key='coverage_beginning_date', value=dataset['coverage_beginning_date']),
+            dict(key='coverage_ending_date', value=dataset['coverage_ending_date']),
+            dict(key='frequency', value=dataset['frequency']),
+            #dict(key='publication_date', value=metadata['publication_date'])
+        ]
+    )
+
+def groups(dataset):
+    dataset = dc.ckan.action.package_show(id=dataset["name"])
+    if [g for g in dataset['groups'] if g['name'].lower() == 'statistics']:
+        print 'Already in group', g['name']
+    else:
+        dc.ckan.action.member_create(
+            id='statistics',
+            object=dataset['name'],
+            object_type='package',
+            capacity='member'
+        )
+    return
 
 def main(workspace):
-    global DATA_DIR
     DATA_DIR = ffs.Path(workspace) / 'data'
     DATA_DIR.mkdir()
 
-    load()
+    dc.ensure_publisher('nhs-england')
+    dc.ensure_group('statistics')
 
-    return 0
+    datasets = json.load(open(os.path.join(DATA_DIR, "metadata.json"), "r"))
+    for dataset in datasets:
+        load_statistic(dataset, DATA_DIR)
+        groups(dataset)
