@@ -30,7 +30,7 @@ def main(workspace):
     print "Found {0} datasets on source".format(len(org['packages']))
 
     for package in org['packages']:
-        print "Scraping ", package['title']
+        print "Scraping ", package['title'].encode('utf8')
 
         dataset_dir = DATA_DIR/package['name']
         dataset_dir.mkdir()

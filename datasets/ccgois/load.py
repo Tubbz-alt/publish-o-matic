@@ -38,9 +38,10 @@ def load_ccgois(datasets):
             url='https://indicators.ic.nhs.uk/webview/',
             tags=dc.tags(*metadata['keyword(s)']),
             resources=resources,
-            frequency=[metadata['frequency'], ],
+            #frequency=[metadata['frequency'], ],
             owner_org='hscic',
             extras=[
+                dict(key='frequency', value=metadata.get('frequency', '')),
                 dict(key='coverage_start_date', value=metadata['coverage_start_date']),
                 dict(key='coverage_end_date', value=metadata['coverage_end_date']),
                 dict(key='domain', value=metadata['domain']),
@@ -53,7 +54,6 @@ def load_ccgois(datasets):
                 dict(key='language', value=metadata['language']),
                 dict(key='assurance_level', value=metadata['assurance_level']),
                 dict(key='release_date', value=metadata['current version uploaded'])
-
             ]
         )
     return

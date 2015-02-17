@@ -37,7 +37,7 @@ def load_statistic(dataset, directory):
             tags=dc.tags(*dataset['tags']),
             resources=dataset["resources"],
             owner_org='nhs-england',
-            extras=extras
+            extras=extras,
         )
         return True
     except Exception, e:
