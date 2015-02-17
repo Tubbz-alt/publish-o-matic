@@ -14,16 +14,17 @@ import ffs
 def load_statistic(dataset, directory):
     for r in dataset['resources']:
         hash = hashlib.sha224(r['url']).hexdigest()
+        print "Upload file is - {}".format(os.path.join(directory, hash))
         r['upload'] = open(os.path.join(directory, hash), 'r')
 
-    print 'Creating', dataset['title'], dataset['name']
+    print 'Creating', dataset['title'].encode('utf8'), dataset['name'].encode('utf8')
     try:
         extras = []
-        if dataset['coverage_start_date']:
+        if dataset.get('coverage_start_date', ''):
             extras.append(dict(key='coverage_start_date', value=dataset['coverage_start_date']))
-        if dataset['coverage_end_date']:
+        if dataset.get('coverage_end_date', ''):
             extras.append(dict(key='coverage_end_date', value=dataset['coverage_end_date']))
-        if dataset['frequency']:
+        if dataset.get('frequency', ''):
             extras.append(dict(key='frequency', value=dataset['frequency']))
 
         dc.Dataset.create_or_update(

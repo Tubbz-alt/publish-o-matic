@@ -133,4 +133,9 @@ def scrape(workspace):
         datasets.extend(process_link(link))
 
     datasets = filter(lambda x: x is not None, datasets)
+
+    # Create a dataset per year from the datasets we were given.
+
+
     return datasets
+
