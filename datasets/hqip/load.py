@@ -3,7 +3,9 @@
 
 The original version of this script was provided by @rossjones
 """
+import os
 import datetime
+import hashlib
 import sys
 import urllib
 
@@ -41,7 +43,7 @@ def main(workspace):
     print "Found {0} datasets on source".format(len(org['packages']))
 
     for package in org['packages']:
-        print 'uploading', package['title']
+        print 'uploading', package['title'].encode('utf8')
         dataset_dir = DATA_DIR/package['name']
         # Get the dataset from DGU
         dataset = dgu.action.package_show(id=package['name'])
@@ -55,18 +57,20 @@ def main(workspace):
         with dataset_dir:
             for resource in dataset['resources']:
                 resource['name'] = resource['description']
-                if resource['format'] == "HTML":
-                    resources.append(resource)
-                    continue
-                if resource['url'].startswith('hhttps'):
-                    resource['url'] = resource['url'].replace('hhttps', 'https')
+                #if resource['format'] == "HTML":
+                #    resources.append(resource)
+                #    continue
+                #if resource['url'].startswith('hhttps'):
+                #    resource['url'] = resource['url'].replace('hhttps', 'https')
 
-                filename = resource['url'].split('/')[-1]
+                #filename = resource['url'].split('/')[-1]
+                filename = hashlib.sha224(resource['url']).hexdigest()
                 datafile = dataset_dir/filename
-                if datafile.is_dir:
-                    resources.append(resource)
+                if datafile.is_dir or not os.path.exists(datafile):
+                    #resources.append(resource)
                     continue
-                resource['upload'] = open(dataset_dir/filename, 'r')
+
+                resource['upload'] = open(datafile, 'r')
                 resources.append(resource)
 
         dataset['resources'] = resources

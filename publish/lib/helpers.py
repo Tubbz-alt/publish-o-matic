@@ -17,6 +17,8 @@ def download_file(url, target_file):
             print "Doesn't exist - fetching"
 
         r = requests.get(url, stream=True)
+        if r.status_code > 500:
+            raise IOError("Failed to get a response from the server")
         with open(target_file, 'wb') as f:
             for chunk in r.iter_content(chunk_size=4096):
                 if chunk:

@@ -3,6 +3,7 @@
 
 The original version of this script was provided by @rossjones
 """
+import hashlib
 import socket
 import sys
 import urllib
@@ -13,6 +14,8 @@ from ckanapi.errors import NotFound, ValidationError
 from dc import ckan as catalogue
 from dc import _org_existsp, Dataset
 import ffs
+
+from publish.lib.helpers import download_file
 
 DATA_DIR = None
 
@@ -52,14 +55,17 @@ def main(workspace):
                 if resource['url'].startswith('hhttps'):
                     resource['url'] = resource['url'].replace('hhttps', 'https')
 
-                print 'downloading', resource['url']
-                filename = resource['url'].split('/')[-1]
+
+                filename = hashlib.sha224(resource['url']).hexdigest()
+                #filename = resource['url'].split('/')[-1]
+
                 datafile = dataset_dir/filename
+                print 'downloading', resource['url'], 'as', datafile
                 if datafile:
                     print 'already downloaded file'
                     continue
                 try:
-                    urllib.urlretrieve(resource['url'], filename)
+                    download_file(resource['url'], datafile)
                 except IOError:
                     print 'FTW Larry? We got a socket error :('
                     continue
