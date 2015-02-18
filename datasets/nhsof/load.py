@@ -17,20 +17,20 @@ def load_nhsof(datasets):
         counter += 1
         resources = []
         for r in metadata['sources']:
-            upload = dc.fh_for_url(r['url'])
             resources.append({
                 'description': r['description'],
-                'name': r['url'].split('/')[-1],
-                'format': r['filetype'],
-                'upload': upload,
+                'name': r['name'],
+                'format': r['format'],
+                'url': r['url'],
             })
 
         print "Resources ready for upload"
         metadata['title'] = 'NHSOF - ' + metadata['title']
-        print u'Creating dataset'
+        name = slugify.slugify(metadata['title']).lower()[:99]
+        print u'Creating dataset: {}'.format(name)
         try:
             dc.Dataset.create_or_update(
-                name=slugify.slugify(metadata['title']).lower()[:99],
+                name=name,
                 title=metadata['title'],
                 state='active',
                 license_id='uk-ogl',

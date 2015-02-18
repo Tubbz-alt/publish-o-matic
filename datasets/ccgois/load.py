@@ -30,7 +30,7 @@ def load_ccgois(datasets):
 
         metadata['title'] = u'CCGOIS - {}'.format(metadata['title'])
         metadata['name'] = make_name_from_title(metadata['title'])
-        print 'Creating {}:{}'.format(metadata['name'], metadata['title'])
+        print u'Creating {}'.format(metadata['name'])
         dc.Dataset.create_or_update(
             name=metadata['name'],
             title=metadata['title'],
