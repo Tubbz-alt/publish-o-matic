@@ -56,7 +56,6 @@ def build_resource(date, text, link):
         "name": link.split('/')[-1],
         "format": ext,
         "description": description.strip(),
-        "url_type": "",
     }
 
 

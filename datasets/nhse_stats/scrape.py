@@ -15,9 +15,6 @@ def main(workspace):
     datasets = []
 
     for importer, modname, ispkg in pkgutil.iter_modules(topics.__path__):
-        if not modname in ['faf']:
-            continue
-
         m = importer.find_module(modname).load_module(modname)
         datasets.extend(m.scrape( DATA_DIR ))
 

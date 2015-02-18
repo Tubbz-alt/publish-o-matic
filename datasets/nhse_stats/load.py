@@ -12,11 +12,6 @@ import ffs
 
 
 def load_statistic(dataset, directory):
-    for r in dataset['resources']:
-        hash = hashlib.sha224(r['url']).hexdigest()
-        print "Upload file is - {}".format(os.path.join(directory, hash))
-        r['upload'] = open(os.path.join(directory, hash), 'r')
-
     print 'Creating', dataset['title'].encode('utf8'), dataset['name'].encode('utf8')
     try:
         extras = []

@@ -37,6 +37,7 @@ class Uploader(object):
         self.bucket = self.conn.get_bucket(self.bucket_name)
 
 
+
     def close(self):
         self.conn.close()
 

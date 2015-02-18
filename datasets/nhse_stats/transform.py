@@ -4,7 +4,8 @@ import json
 
 import ffs
 
-from publish.lib.helpers import download_file
+from publish.lib.helpers import filename_for_resource, download_file
+from publish.lib.upload import Uploader
 
 def main(workspace):
     DATA_DIR = ffs.Path(workspace) / 'data'
@@ -13,6 +14,8 @@ def main(workspace):
     datasets = json.load(open(os.path.join(DATA_DIR, "metadata.json"), 'r'))
 
     tag_list = ["Statistics"]
+    u = Uploader("stats")
+
     for dataset in datasets:
         print "Processing", dataset['name']
 
@@ -24,16 +27,16 @@ def main(workspace):
         dataset['tags'] = tags
 
         print "..fetching resources"
-        for r in dataset["resources"]:
-            name = hashlib.sha224(r['url']).hexdigest()
-            target = os.path.join(DATA_DIR, name)
-            if os.path.exists(target):
-                print "Target exists..."
-                continue
+        for resource in dataset["resources"]:
+            filename = filename_for_resource(resource)
+            path = DATA_DIR / filename
 
-            download_file(r['url'], target)
+            download_file(resource['url'], path)
+            print "Uploading to S3"
+            url = u.upload(path)
+            resource['url'] = url
 
-
+    u.close()
     json.dump(datasets, open(os.path.join(DATA_DIR, "metadata.json"), 'wb'))
 
     return 0
