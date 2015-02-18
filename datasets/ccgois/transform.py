@@ -18,7 +18,7 @@ def main(workspace):
         resources = []
         for resource in dataset['sources']:
             resource['format'] = resource['filetype']
-            resource['name'] = resource['url'].split('/')[-1],
+            resource['name'] = resource['url'].split('/')[-1]
 
             filename = filename_for_resource(resource)
             path = DATA_DIR / filename
@@ -30,7 +30,5 @@ def main(workspace):
             resources.append(resource)
         dataset['resources'] = resources
     u.close()
-
-    print datasets[0]['resources']
 
     json.dump(datasets, open(DATA_DIR / 'ccgois_indicators.json', 'w'))
