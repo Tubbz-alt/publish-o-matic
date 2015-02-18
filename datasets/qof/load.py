@@ -8,8 +8,7 @@ import dc
 import ffs
 import slugify
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
+DATA_DIR = None
 
 def datasets():
     for directory in DATA_DIR.ls():
@@ -21,9 +20,9 @@ def load_qof():
         resources = [
             dict(
                 description=r['description'],
-                name=r['url'].split('/')[-1],
-                format=r['filetype'],
-                upload=open(str(directory/r['url'].split('/')[-1]), 'r')
+                name=r['name'],
+                format=r['format'],
+                url=r['url']
             )
             for r in metadata['resources']
         ]
@@ -70,12 +69,11 @@ def group_qof():
     print remaining
     return
 
-def main():
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / 'data'
     dc.ensure_publisher('hscic')
     dc.ensure_group('qof')
     load_qof()
     group_qof()
     return 0
-
-if __name__ == '__main__':
-    sys.exit(main())

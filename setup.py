@@ -51,6 +51,7 @@ setup(
             'nhsof=datasets.nhsof:entrypoints',
             'ods=datasets.ods:entrypoints',
             'phof=datasets.phof:entrypoints',
+            'qof=datasets.qof:entrypoints',
             'nhse_stats=datasets.nhse_stats:entrypoints',
         ]
     }
