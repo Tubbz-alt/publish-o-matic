@@ -20,8 +20,9 @@ def load_ascof():
             dict(
                 description=r['description'],
                 name=r['url'].split('/')[-1],
-                format=r['filetype'],
-                upload=open(str(directory/r['url'].split('/')[-1]), 'r')
+                format=r['format'],
+                url=r['url']
+                #upload=open(str(directory/r['url'].split('/')[-1]), 'r')
             )
             for r in metadata['resources']
         ]

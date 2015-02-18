@@ -8,6 +8,10 @@ import sys
 import ffs
 import re
 
+from publish.lib.helpers import filename_for_resource, download_file
+from publish.lib.upload import Uploader
+
+
 DATA_DIR = None
 
 def datasets():
@@ -26,6 +30,19 @@ def add_metadata_to_ascof_datasets():
         metadata['coverage_end_date'] = ends.isoformat()
         metadata['frequency'] = 'yearly'
         metadata['title'] = 'ASCOF - Adult Social Care Outcomes Framework, England -{0}-{1}'.format(match.group(1), match.group(2))
+
+        u = Uploader("ascof")
+        for resource in metadata['resources']:
+            print resource['url']
+            filename = filename_for_resource(resource)
+            path = directory / filename
+
+            download_file(resource['url'], path)
+            print "Uploading to S3"
+            url = u.upload(path)
+            resource['url'] = url
+            print resource['url']
+        u.close()
 
         metadata_file.truncate()
         metadata_file << json.dumps(metadata, indent=2)

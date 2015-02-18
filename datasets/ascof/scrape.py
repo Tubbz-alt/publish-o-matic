@@ -43,9 +43,9 @@ def _hscic_resources_from_tree(tree):
         url = resource.get('href')
         if not url:
             print resource
-        filetype = url.split('.')[-1]
+        format = url.split('.')[-1]
         description = resource.text_content().strip()
-        resource_dicts.append(dict(url=url, description=description, filetype=filetype))
+        resource_dicts.append(dict(url=url, description=description, format=format))
     return resource_dicts
 
 
@@ -82,10 +82,6 @@ def retrieve_ascof_datasets(datasets):
         print dataset['title']
         dataset_dir = DATA_DIR/dataset['title']
         dataset_dir.mkdir()
-        with dataset_dir:
-            for resource in dataset['resources']:
-                print resource['url']
-                urllib.urlretrieve(resource['url'], resource['url'].split('/')[-1])
         metadata_file = dataset_dir/'dataset.metadata.json'
         if metadata_file:
             metadata_file.truncate()

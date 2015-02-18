@@ -31,6 +31,7 @@ def main(workspace):
             print "Uploading to S3"
             url = u.upload(path)
             resource['url'] = url
+    u.close()
 
     json.dump(datasets, open(metadata_file, 'w'))
 
