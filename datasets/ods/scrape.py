@@ -55,7 +55,8 @@ def build_resource(date, text, link):
         'url': link,
         "name": link.split('/')[-1],
         "format": ext,
-        "description": description.strip()
+        "description": description.strip(),
+        "url_type": "",
     }
 
 
@@ -216,8 +217,9 @@ def main(workspace):
     metafile << json.dumps(output_datasets, indent=2)
 
     #for d in output_datasets:
-        #for r in d['resources']:
-            #download_and_hash_file(d['name'], r['url'])
+    #    for r in d['resources']:
+    #        hash = hashlib.sha224(r['url']).hexdigest()
+    #        download_file(r['url'], os.path.join(DATA_DIR, hash))
 
 
 

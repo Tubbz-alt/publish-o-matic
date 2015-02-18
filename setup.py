@@ -20,7 +20,7 @@ setup(
     include_package_data=True,
     dependency_links=[
         "http://github.com/davidmiller/ffs/tarball/master#egg=ffs-0.0.8",
-        "http://github.com/davidmiller/dc/tarball/master#egg=dc-0.0.1",
+        "http://github.com/nhsengland/dc/tarball/master#egg=dc-0.0.1",
         "http://github.com/rossjones/dmswitch/tarball/master#egg=dmswitch-0.0.1"
     ],
     install_requires = [
@@ -36,7 +36,8 @@ setup(
         "ffs==0.0.8",
         "dmswitch==0.0.1",
         "requests-cache==0.4.9",
-        "html2text==2014.12.29"
+        "html2text==2014.12.29",
+        "boto==2.36.0"
     ],
     entry_points = {
         'console_scripts': [

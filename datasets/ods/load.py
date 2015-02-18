@@ -19,20 +19,23 @@ def datasets():
         yield directory, input_file, dataset
 
 def get_local_filename(dataset_dir, url):
-    x = os.path.join(dataset_dir, hashlib.sha224(url).hexdigest())
+    x = os.path.join(DATA_DIR, hashlib.sha224(url).hexdigest())
     return x
 
 def load_ods():
     for directory, metadata_file, metadata in datasets():
+        """
         resources = [
             dict(
                 description=r['name'],
                 name=r['url'].split('/')[-1],
                 format=r['url'][-4:].upper(),
-                upload=open(get_local_filename(directory, r['url']), 'r')
+                url=r['url'],
+                #upload=open(get_local_filename(directory, r['url']), 'r')
             )
             for r in metadata['resources']
         ]
+        """
 
         print 'Creating', metadata['title'], metadata['name']
 
@@ -44,7 +47,7 @@ def load_ods():
             notes=metadata['notes'],
             #url=metadata['source'],
             tags=dc.tags(*metadata['tags']),
-            resources=resources,
+            resources=metadata["resources"],
             owner_org='hscic',
             extras=[
                 dict(key='coverage_start_date', value=metadata['coverage_start_date']),
