@@ -11,12 +11,14 @@ from lxml.html import fromstring, tostring
 import re
 import requests
 
-HERE = ffs.Path.here()
-DATA_DIR = HERE / 'data'
-DATA_DIR.mkdir()
-METADATA_DIR = HERE / '../../metadata/data'
+from publish.lib.metadata import get_resource_path
+from publish.lib.helpers import filename_for_resource, download_file
+from publish.lib.upload import Uploader
 
-HSCIC_DATASETS = METADATA_DIR/'datasets.json'
+
+DATA_DIR = None
+
+HSCIC_DATASETS = get_resource_path('data/datasets.json')
 
 QOF_ROOT = 'http://www.hscic.gov.uk/qof'
 
@@ -42,8 +44,9 @@ def _hscic_resources_from_tree(tree):
         if not url:
             print resource
         filetype = url.split('.')[-1]
+        name = url.split('/')[-1]
         description = resource.text_content().strip()
-        resource_dicts.append(dict(url=url, description=description, filetype=filetype))
+        resource_dicts.append(dict(url=url, description=description, format=filetype.upper(), name=name))
     return resource_dicts
 
 def qof_dataset(url):
@@ -84,24 +87,36 @@ def find_qof_datasets():
     return datasets
 
 def retrieve_qof_datasets(datasets):
+    u = Uploader("qof")
+
     for dataset in datasets:
         print dataset['title']
         dataset_dir = DATA_DIR/dataset['title']
         dataset_dir.mkdir()
         with dataset_dir:
             for resource in dataset['resources']:
-                print resource['url']
-                urllib.urlretrieve(resource['url'], resource['url'].split('/')[-1])
+                filename = filename_for_resource(resource)
+                path = dataset_dir / filename
+
+                download_file(resource['url'], path)
+                print "Uploading to S3"
+                url = u.upload(path)
+                resource['url'] = url
+
+
+
         metadata_file = dataset_dir/'dataset.metadata.json'
         if metadata_file:
             metadata_file.truncate()
         metadata_file << json.dumps(dataset, indent=2)
 
+    u.close()
 
-def main():
+
+def main(workspace):
+    global DATA_DIR
+    DATA_DIR = ffs.Path(workspace) / "data"
     datasets = find_qof_datasets()
     retrieve_qof_datasets(datasets)
     return 0
 
-if __name__ == '__main__':
-    sys.exit(main())
