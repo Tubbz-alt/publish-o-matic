@@ -8,7 +8,7 @@ from transform import main as main_transform
 
 def entrypoints():
     return {
-#        'scrape': main_scrape,
-#        'transform': main_transform,
-#        'load': main_load
+        'scrape': main_scrape,
+        'transform': main_transform,
+        'load': main_load
     }

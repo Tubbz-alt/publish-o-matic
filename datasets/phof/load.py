@@ -3,6 +3,7 @@ No longer required/used
 
 Load the PHOF datasets into a CKAN instance
 """
+import json
 import sys
 
 import dc
@@ -11,39 +12,44 @@ import slugify
 
 DATA_DIR = None
 
-def datasets():
-    metadata = DATA_DIR/'dataset.metadata.json'
-    yield DATA_DIR, metadata, metadata.json_load()
 
 def load_phe():
-    for directory, metadata_file, metadata in datasets():
-        resources = [
-            dict(
-                description=r['description'],
-                name=r['url'].split('/')[-1],
-                format=r['filetype'],
-                upload=open(str(directory/r['url'].split('/')[-1]), 'r')
-            )
-            for r in metadata['resources']
-        ]
-        print 'Creating', metadata['title']
-        dc.Dataset.create_or_update(
-            name=slugify.slugify(metadata['title']).lower(),
-            title=metadata['title'],
-            state='active',
-            licence_id='ogl',
-            notes=metadata['summary'],
-            url=metadata['source'],
-            tags=dc.tags(*metadata['tags']),
-            resources=resources,
-            owner_org='hscic',
-            extras=[
-                dict(key='coverage_start_date', value=metadata['coverage_start_date']),
-                dict(key='coverage_end_date', value=metadata['coverage_end_date']),
-                dict(key='frequency', value=metadata['frequency']),
-                dict(key='publication_date', value=metadata['publication_date'])
-            ]
+
+    metadata = json.load(open(DATA_DIR/'dataset.metadata.json'))
+
+    resources = [
+        dict(
+            description=r['description'],
+            name=r['name'],
+            format=r['format'],
+            url='url'
         )
+        for r in metadata['resources']
+    ]
+
+    extras = [
+            dict(key='frequency', value=metadata['frequency']),
+        ]
+    if 'publication_date' in metadata:
+        extras.append(dict(key='publication_date', value=metadata['publication_date']))
+    extras.append(dict(key='coverage_start_date', value=metadata.get('coverage_start_date','')))
+    extras.append(dict(key='coverage_end_date', value=metadata.get('coverage_end_date')))
+
+    print extras
+
+    print 'Creating', metadata['title']
+    dc.Dataset.create_or_update(
+        name=slugify.slugify(metadata['title']).lower(),
+        title=metadata['title'],
+        state='active',
+        licence_id='ogl',
+        notes=metadata['summary'],
+        url=metadata['source'],
+        tags=dc.tags(*metadata['tags']),
+        resources=resources,
+        owner_org='hscic',
+        #extras=extras
+    )
     return
 
 def group_phe():
@@ -69,7 +75,7 @@ def main(workspace):
     dc.ensure_publisher('phe')
     dc.ensure_group('phof')
     load_phe()
-    group_phe()
+    #group_phe()
     return 0
 
 if __name__ == '__main__':

@@ -17,13 +17,12 @@ def pull_phof_datasets():
     """
     dataset = {
         'resources': [{
+            'name': "PHOF.xlsx",
             'url': PHOF_DATA_FILE,
-            'filetype': 'xls',
+            'format': 'XLS',
             'description': 'Public Health Outcomes Framework data'
         }]
     }
-    with DATA_DIR:
-        urllib.urlretrieve(PHOF_DATA_FILE, 'PHOF.xlsx')
     metadata_file = DATA_DIR/'dataset.metadata.json'
     if metadata_file:
         metadata_file.truncate()
@@ -35,6 +34,3 @@ def main(workspace):
     DATA_DIR = ffs.Path(workspace) / 'data'
     pull_phof_datasets()
     return 0
-
-if __name__ == '__main__':
-    sys.exit(main(ffs.Path.here()))

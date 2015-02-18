@@ -8,6 +8,10 @@ import sys
 import ffs
 import re
 
+from publish.lib.helpers import filename_for_resource, download_file
+from publish.lib.upload import Uploader
+
+
 DATA_DIR = None
 
 PHOF_SUMMARY = """The Public Health Outcomes Framework Healthy lives, healthy people: Improving outcomes and supporting transparency sets out a vision for public health, desired outcomes and the indicators that will help us understand how well public health is being improved and protected.
@@ -32,8 +36,20 @@ def add_metadata_to_ascof_datasets():
     metadata['summary'] = PHOF_SUMMARY
     metadata['source'] = 'http://www.phoutcomes.info/public-health-outcomes-framework'
 
-    metadata['coverage_start_date'] = '01/01/2000'
-    metadata['coverage_end_date'] = '31/12/2013'
+    metadata['coverage_start_date'] = '2000-01-01'
+    metadata['coverage_end_date'] = '2013-12-31'
+
+    u = Uploader("phof")
+    for resource in metadata['resources']:
+        filename = filename_for_resource(resource)
+        path = DATA_DIR / filename
+
+        download_file(resource['url'], path)
+        print "Uploading to S3"
+        url = u.upload(path)
+        resource['url'] = url
+    u.close()
+
 
     metadata_file.truncate()
     metadata_file << json.dumps(metadata, indent=2)
