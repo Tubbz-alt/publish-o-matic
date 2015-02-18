@@ -9,7 +9,7 @@ import slugify
 
 from publish.lib.metadata import get_resource_file
 
-def load_ccgois(datasets):
+def load_nhsof(datasets):
     counter = 0
 
     # There are only 35 datasets from the scrape, why are we skipping 43.
@@ -59,7 +59,7 @@ def load_ccgois(datasets):
             print u"Failed to create {}".format(slugify.slugify(metadata['title']).lower()[:99])
     return counter
 
-def group_ccgois(datasets):
+def group_nhsof(datasets):
     for metadata in datasets:
         #metadata['title'] = 'NHSOF - ' + metadata['title']
         dataset_name = slugify.slugify(metadata['title']).lower()[:99]
@@ -96,9 +96,9 @@ def main(workspace):
     dc.ensure_publisher('hscic')
     print "Ensuring group"
     dc.ensure_group('nhsof')
-    wrote = load_ccgois(datasets)
+    wrote = load_nhsof(datasets)
     if wrote:
-        group_ccgois(datasets)
+        group_nhsof(datasets)
     else:
         print "Created/processed no datasets ..."
 

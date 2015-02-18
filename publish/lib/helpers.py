@@ -18,8 +18,10 @@ def download_file(url, target_file):
                 print "-- Exists, not fetching"
                 return target_file
 
-
-        r = requests.get(url, stream=True)
+        try:
+            r = requests.get(url, stream=True)
+        except:
+            raise
         if r.status_code > 500:
             raise IOError("Failed to get a response from the server")
 

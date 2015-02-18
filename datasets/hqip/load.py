@@ -1,3 +1,4 @@
+
 """
 "Load" HQIP data from DGU.
 
@@ -16,6 +17,9 @@ from dc import ckan as catalogue
 from dc import _org_existsp, Dataset
 import ffs
 
+from publish.lib.helpers import filename_for_resource, download_file
+from publish.lib.upload import Uploader
+
 DATA_DIR = None
 
 SOURCE = "http://data.gov.uk"
@@ -24,6 +28,8 @@ TARGET_ORGANISATION = "healthcare-quality-improvement-partnership"
 dgu =  ckanapi.RemoteCKAN(SOURCE)
 
 def format_date(date):
+    if not date:
+        return ''
     return datetime.datetime.strptime(date, "%d/%m/%Y").strftime("%Y-%m-%d")
 
 def main(workspace):
@@ -52,38 +58,46 @@ def main(workspace):
         # Set the new owning organisation
         dataset['owner_org'] = org['name']
 
-        resources = []
+        u = Uploader("hqip")
+        for resource in dataset['resources']:
+            resource['name'] = resource['description']
+            if resource['format'] == "HTML":
+                continue
+            if resource['url'].startswith('hhttps'):
+                resource['url'] = resource['url'].replace('hhttps', 'https')
 
-        with dataset_dir:
-            for resource in dataset['resources']:
-                resource['name'] = resource['description']
-                #if resource['format'] == "HTML":
-                #    resources.append(resource)
-                #    continue
-                #if resource['url'].startswith('hhttps'):
-                #    resource['url'] = resource['url'].replace('hhttps', 'https')
+            if 'cache_filepath' in resource:
+                del resource['cache_filepath']
+            if 'tracking_summary' in resource:
+                del resource['tracking_summary']
 
-                #filename = resource['url'].split('/')[-1]
-                filename = hashlib.sha224(resource['url']).hexdigest()
-                datafile = dataset_dir/filename
-                if datafile.is_dir or not os.path.exists(datafile):
-                    #resources.append(resource)
-                    continue
+            filename = filename_for_resource(resource)
 
-                resource['upload'] = open(datafile, 'r')
-                resources.append(resource)
+            datafile = dataset_dir/filename
+            print 'downloading', resource['url'], 'as', datafile
 
-        dataset['resources'] = resources
+            try:
+                download_file(resource['url'], datafile)
+                print "Uploading to S3"
+                url = u.upload(datafile)
+                resource['url'] = url
+            except:
+                print '***' * 30
+                print "Failed to download: ", resource['url']
+        u.close()
 
         # Add a nice tag so we can find them all again
         dataset['tags'].append({'name': 'HQIP' })
         print 'Owner org is', org['name']
         try:
-            extras = [
-                    dict(key='coverage_start_date', value=format_date(dataset['temporal_coverage-from'])),
-                    dict(key='coverage_end_date', value=format_date(dataset['temporal_coverage-to'])),
-                    dict(key='frequency', value=dataset['update_frequency']),
-                ]
+            extras = []
+            if 'temporal_coverage-from' in dataset:
+                extras.append(dict(key='coverage_start_date', value=format_date(dataset['temporal_coverage-from'])))
+            if 'temporal_coverage' in dataset:
+                extras.append(dict(key='coverage_end_date', value=format_date(dataset['temporal_coverage-to'])))
+            if 'frequency' in dataset:
+                extras.append(dict(key='frequency', value=dataset['update_frequency']))
+
             new_dataset = Dataset.create_or_update(
                 name=dataset['name'],
                 title=dataset['title'],
@@ -98,13 +112,11 @@ def main(workspace):
                 extras=extras
             )
             print "Created {}".format(dataset['name'])
-        except ValueError:
-            print 'skipping because error'
+        except ValueError as e:
+            print 'skipping because error', e
             continue
         except ValidationError:
             raise
             print "Failed to upload {}".format(dataset['name'])
 
 
-if __name__ == '__main__':
-    sys.exit(main(ffs.Path.here()))
