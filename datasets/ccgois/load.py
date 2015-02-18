@@ -4,6 +4,7 @@ Load the CCGOIS datasets into a CKAN instance
 import dc
 import json
 import slugify
+import ffs
 
 def make_name_from_title(title):
     # For some reason, we're finding duplicate names
@@ -14,18 +15,19 @@ def make_name_from_title(title):
 
 
 def load_ccgois(datasets):
-    # TODO: Clarify with ntoll the reason behind skipping the first 16 datasets
-    # here (but they are not skipped in group_ccgois).
-    for metadata in datasets[16:]:
+    for metadata in datasets:
         resources = [
             dict(
                 description=r['description'],
-                name=r['url'].split('/')[-1],
+                name=r['name'],
                 format=r['filetype'],
-                upload=dc.fh_for_url(r['url'])
+                url=r['url']
             )
-            for r in metadata['sources']
+            for r in metadata['resources']
         ]
+
+        print [r['name'] for r in metadata['resources']]
+
         metadata['title'] = u'CCGOIS - {}'.format(metadata['title'])
         metadata['name'] = make_name_from_title(metadata['title'])
         print 'Creating {}:{}'.format(metadata['name'], metadata['title'])
@@ -81,11 +83,9 @@ def group_ccgois(datasets):
     return
 
 def main(workspace):
-    datasets = json.load(open('ccgois_indicators.json'))
+    DATA_DIR = ffs.Path(workspace)
+    datasets = json.load(open(DATA_DIR / 'ccgois_indicators.json'))
     dc.ensure_publisher('hscic')
     dc.ensure_group('ccgois')
     load_ccgois(datasets)
     group_ccgois(datasets)
-
-if __name__ == '__main__':
-    main(None)
