@@ -147,7 +147,7 @@ def scrape(workspace):
 
     datasets = []
 
-    #datasets.extend(commissioner_based())
+    datasets.extend(commissioner_based())
     datasets.extend(default_cwt())
 
     datasets = filter(lambda x: x is not None, datasets)

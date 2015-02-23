@@ -4,6 +4,19 @@ import os
 import requests
 import requests_cache
 
+def anchor_to_resource(resource, post_create_func=None):
+    """ Converts an LXML 'A' element into a resource dict """
+    href = resource.get('href')
+    resource =  {
+        "description": resource.text_content().encode('utf8'),
+        "name": href.split('/')[-1],
+        "url": href,
+        "format": href[href.rfind(".")+1:].upper(),
+    }
+    if post_create_func:
+        post_create_func(resource)
+    return resource
+
 def filename_for_resource(resource):
     hashed = hashlib.md5(resource['url']).hexdigest()
     return "{}.{}".format(hashed, resource.get('format', 'bin').lower())
