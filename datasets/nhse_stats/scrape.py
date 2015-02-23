@@ -19,5 +19,4 @@ def main(workspace):
         datasets.extend(m.scrape( DATA_DIR ))
 
     json.dump(datasets, open(os.path.join(DATA_DIR, "metadata.json"), 'wb'))
-
     return 0

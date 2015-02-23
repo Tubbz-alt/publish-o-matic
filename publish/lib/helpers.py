@@ -64,4 +64,8 @@ def remove_tables_from_dom(dom):
         bad.getparent().remove(bad)
 
 def to_markdown(text):
-    return html2text.html2text(text.decode('latin-1'))
+    h = html2text.HTML2Text()
+    h.ignore_images = True
+    txt = h.handle(text.decode('latin-1'))
+    h.close()
+    return txt
