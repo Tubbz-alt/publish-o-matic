@@ -33,8 +33,23 @@ def month(url, desc):
     html = requests.get(url).content
     page = fromstring(html)
 
-    links = filter(lambda x: x.text_content().strip().startswith('Monthly'), page.cssselect('.center p a'))
+    # http://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2014/09/Monthly-Diagnostics-Web-File-Timeseries-December-2014.xls
+    links = page.cssselect('.center p a')
+    trimmed_links = filter(lambda x: x.text_content().strip().startswith('Historical'), links)
+    if trimmed_links:
+        t = page.cssselect('header h1')[1].text_content()
+        dataset = {
+            "title": "Monthly Diagnostics Data - Timeseries - {}".format(t[-7:]),
+            "origin": url,
+            "tags": ["statistics", "diagnostics"],
+            "notes": desc,
+            "resources": [anchor_to_resource(a) for a in trimmed_links]
+        }
+        dataset["name"] = slugify.slugify(dataset["title"]).lower()
+        datasets.append(dataset)
 
+
+    links = filter(lambda x: x.text_content().strip().startswith('Monthly'), page.cssselect('.center p a'))
     for first, second in _chunky(links):
         when = re.match('.*\s(.*?\s\d{4}?).*\(.*', first.text_content().strip())
         dataset = {
