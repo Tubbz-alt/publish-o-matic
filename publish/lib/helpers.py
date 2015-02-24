@@ -4,11 +4,11 @@ import os
 import requests
 import requests_cache
 
-def anchor_to_resource(resource, post_create_func=None):
+def anchor_to_resource(resource, post_create_func=None, title=None):
     """ Converts an LXML 'A' element into a resource dict """
     href = resource.get('href')
     resource =  {
-        "description": resource.text_content().encode('utf8'),
+        "description": title or resource.text_content().encode('utf8'),
         "name": href.split('/')[-1],
         "url": href,
         "format": href[href.rfind(".")+1:].upper(),
