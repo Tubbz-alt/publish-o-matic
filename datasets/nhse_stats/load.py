@@ -32,6 +32,7 @@ def load_statistic(dataset, directory):
             tags=dc.tags(*dataset['tags']),
             resources=dataset["resources"],
             owner_org='nhs-england',
+            origin=dataset.get('origin', '')
             extras=extras,
         )
         return True
