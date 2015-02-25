@@ -31,13 +31,13 @@ def anchor_to_resource(resource, post_create_func=None, title=None):
     return resource
 
 def filename_for_resource(resource):
-    hashed = hashlib.md5(resource['url']).hexdigest()
+    hashed = hashlib.md5(resource['url'].encode('utf8', 'ignore')).hexdigest()
     return "{}.{}".format(hashed, resource.get('format', 'bin').lower())
 
 def download_file(url, target_file):
     with requests_cache.disabled():
         size = 0
-        print "- Fetching url: {}".format(url)
+        print u"- Fetching url: {}".format(url)
 
         if os.environ.get('REQ_DEV') == "1":
             if os.path.exists(target_file):
@@ -45,7 +45,7 @@ def download_file(url, target_file):
                 return target_file
 
         try:
-            r = requests.get(url, stream=True)
+            r = requests.get(unicode(url), stream=True)
         except:
             raise
         if r.status_code > 500:
