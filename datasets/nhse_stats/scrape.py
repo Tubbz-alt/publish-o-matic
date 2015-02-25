@@ -18,8 +18,14 @@ def main(workspace):
         if modname not in ['mhc']:
             continue
 
-        m = importer.find_module(modname).load_module(modname)
-        datasets.extend(m.scrape( DATA_DIR ))
+        try:
+            m = importer.find_module(modname).load_module(modname)
+            datasets.extend(m.scrape( DATA_DIR ))
+        except:
+            # Do not fail all scrapers just because one of them failed.
+            # Log it, and carry on
+            # TODO: Log it.
+            pass
 
     json.dump(datasets, open(os.path.join(DATA_DIR, "metadata.json"), 'wb'))
     return 0
