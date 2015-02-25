@@ -1,7 +1,6 @@
 """
-Load the Statistic datasets into a CKAN instance
+Load the Staff Survey datasets into a CKAN instance
 """
-import hashlib
 import json
 import os
 import sys
@@ -10,8 +9,7 @@ import dc
 import ffs
 
 
-
-def load_statistic(dataset, directory):
+def load_dataset(dataset, directory):
     print 'Creating', dataset['title'].encode('utf8'), dataset['name'].encode('utf8')
     try:
         extras = []
@@ -43,11 +41,11 @@ def load_statistic(dataset, directory):
 
 def groups(dataset):
     dataset = dc.ckan.action.package_show(id=dataset["name"])
-    if [g for g in dataset['groups'] if g['name'].lower() == 'statistics']:
+    if [g for g in dataset['groups'] if g['name'].lower() == 'surveys']:
         print 'Already in group', g['name']
     else:
         dc.ckan.action.member_create(
-            id='statistics',
+            id='surveys',
             object=dataset['name'],
             object_type='package',
             capacity='member'
@@ -59,9 +57,9 @@ def main(workspace):
     DATA_DIR.mkdir()
 
     dc.ensure_publisher('nhs-england')
-    dc.ensure_group('statistics')
+    dc.ensure_group('surveys')
 
     datasets = json.load(open(os.path.join(DATA_DIR, "metadata.json"), "r"))
     for dataset in datasets:
-        if load_statistic(dataset, DATA_DIR):
+        if load_dataset(dataset, DATA_DIR):
             groups(dataset)

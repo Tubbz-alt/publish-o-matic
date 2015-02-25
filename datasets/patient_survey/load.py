@@ -44,12 +44,26 @@ def load_statistic(dataset, directory):
 
     return False
 
+def groups(dataset):
+    dataset = dc.ckan.action.package_show(id=dataset["name"])
+    if [g for g in dataset['groups'] if g['name'].lower() == 'surveys']:
+        print 'Already in group', g['name']
+    else:
+        dc.ckan.action.member_create(
+            id='surveys',
+            object=dataset['name'],
+            object_type='package',
+            capacity='member'
+        )
+    return
+
 
 def main(workspace):
     DATA_DIR = ffs.Path(workspace) / 'data'
     DATA_DIR.mkdir()
 
     dc.ensure_publisher('gp-survey')
+    dc.ensure_group('surveys')
 
     def year_as_key(x):
         return x['title'][-4:]

@@ -54,6 +54,7 @@ setup(
             'qof=datasets.qof:entrypoints',
             'nhse_stats=datasets.nhse_stats:entrypoints',
             'patient_survey=datasets.patient_survey:entrypoints',
+            'staff_survey=datasets.staff_survey:entrypoints',
         ]
     }
 )

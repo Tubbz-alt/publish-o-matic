@@ -3,6 +3,19 @@ import html2text
 import os
 import requests
 import requests_cache
+from lxml.html import fromstring
+
+def hd(lst):
+    """ Returns first element from list if it exists """
+    return lst[0] if lst else None
+
+def tl(lst):
+    """ Returns all but first element from list if it len(list) > 1 """
+    return lst[1:] if len(lst) > 1 else None
+
+def get_dom(url):
+    html = requests.get(url).content
+    return fromstring(html)
 
 def anchor_to_resource(resource, post_create_func=None, title=None):
     """ Converts an LXML 'A' element into a resource dict """
