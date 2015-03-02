@@ -1,7 +1,5 @@
-"""
-Scrapes the A and E waiting times at
-http://www.england.nhs.uk/statistics/statistical-work-areas/ae-waiting-times-and-activity/
-"""
+""" Scraper for http://www.england.nhs.uk/statistics/statistical-work-areas/critical-care-capacity/ """
+
 import calendar
 import datetime
 import re
@@ -14,7 +12,7 @@ import slugify
 from publish.lib.helpers import to_markdown, anchor_to_resource, hd, tl
 
 
-ROOT = "http://www.england.nhs.uk/statistics/statistical-work-areas/ae-waiting-times-and-activity/"
+ROOT = "http://www.england.nhs.uk/statistics/statistical-work-areas/critical-care-capacity/"
 DEFAULT_NOTES = None
 YEAR_MATCH = re.compile(".*(\d{4}).*")
 
@@ -33,9 +31,9 @@ def default_notes(page):
     desc = []
     while True:
         p = p.getnext()
-        if p.tag != 'p':
+        if p.tag not in ['p', 'ul']:
             break
-        s = p.text_content().strip()
+        s = tostring(p)
         s = s.replace('&', '&amp;')
         desc.append(s)
     DEFAULT_NOTES = to_markdown("".join(desc))
@@ -45,13 +43,12 @@ def get_time_series(h3, url):
     print "Time series..."
 
     dataset = {
-        "title": "A&E Attendances and Emergency Admissions - Time Series",
+        "title": "Critical Care Bed Capacity and Urgent Operations Cancelled - Time Series",
         "resources": [anchor_to_resource(l) for l in h3.getnext().cssselect('a')],
         "notes": DEFAULT_NOTES,
         "origin": url,
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
-
     return dataset
 
 def add_year_block(header, url):
@@ -69,26 +66,48 @@ def add_year_block(header, url):
             break
         links.extend(h3.cssselect('a'))
 
+    year = m.groups()[1]
+    import string
+    month = filter(lambda x: x in string.printable, m.groups()[0].strip())
+
     dataset = {
-        "title": "A&E Attendances and Emergency Admissions - {}".format(header.text_content().strip()),
+        "title": u"Critical Care Bed Capacity and Urgent Operations Cancelled - {} {}".format(month, year),
         "resources": [anchor_to_resource(l) for l in links],
         "notes": DEFAULT_NOTES,
         "origin": url,
-        "frequency": "Weekly"
+        "frequency": "Monthly"
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 
-    mnth = list(calendar.month_name).index(m.groups()[0].strip())
+    mnth = list(calendar.month_name).index(month)
     _, e = calendar.monthrange(int(m.groups()[1]), mnth )
     dataset['coverage_start_date'] = "{}-{}-01".format(m.groups()[1].strip(), mnth)
     dataset['coverage_end_date'] = "{}-{}-{}".format(m.groups()[1].strip(), mnth, e)
 
     return dataset
 
+def add_singles(page, url):
+    links = page.cssselect('.center p a')
+
+    dataset = {
+        "title": page.cssselect('h1')[1].text_content().strip(),
+        "resources": [],
+        "notes": DEFAULT_NOTES,
+        "frequency": "Monthly",
+        "origin": url
+    }
+    dataset["name"] = slugify.slugify(dataset["title"]).lower()
+
+    for link in links:
+        if not 'Monthly' in link.text_content().strip():
+            continue
+        dataset["resources"].append(anchor_to_resource(link))
+
+    return dataset
+
 def scrape_page(url):
     html = requests.get(url)
     page = fromstring(html.content)
-    default_notes(page)
 
     print "Scraping", url
 
@@ -97,28 +116,39 @@ def scrape_page(url):
         headers = page.cssselect('h2')
 
     datasets = []
-    for h3 in headers:
-        s = h3.text_content().strip()
-        if "Time Series" in s:
-            datasets.append(get_time_series(h3, url))
-        m = YEAR_MATCH.match(s)
-        if m:
-            datasets.append(add_year_block(h3, url))
+    if not headers:
+        datasets.append(add_singles(page, url))
+    else:
+        for h3 in headers:
+            s = h3.text_content().strip()
+            #if "Time Series" in s:
+            #    datasets.append(get_time_series(h3, url))
+            m = YEAR_MATCH.match(s)
+            if m:
+                print "Processing ", h3.text_content().strip()
+                try:
+                    datasets.append(add_year_block(h3, url))
+                except Exception, e:
+                    import traceback
+                    print traceback.format_exc()
+                    raise
 
     print "Returning", len(datasets)
     return datasets
 
 
 def scrape(workspace):
-    print "Scraping A&E Waiting Times with workspace {}".format(workspace)
+    print "Scraping Critical Care Capacity {}".format(workspace)
 
     html = requests.get(ROOT)
     page = fromstring(html.content)
+    default_notes(page)
 
-    h3 = hd([h for h in page.cssselect('h3') if h.text_content().strip() == 'Weekly Data and Quarterly Aggregates'])
+    h3 = hd([h for h in page.cssselect('h3') if h.text_content().strip() == 'Latest Data'])
     links = h3.getnext().cssselect('a')
 
     datasets = []
+    datasets.extend(scrape_page(links[-1].get("href")))
     for l in links:
         datasets.extend(scrape_page(l.get("href")))
 
