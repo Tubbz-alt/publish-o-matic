@@ -15,8 +15,8 @@ def main(workspace):
     datasets = []
 
     for importer, modname, ispkg in pkgutil.iter_modules(topics.__path__):
-        if modname not in ['child_immunisation']:
-            continue
+        #if modname not in ['a_and_e']:
+        #    continue
 
         try:
             m = importer.find_module(modname).load_module(modname)
