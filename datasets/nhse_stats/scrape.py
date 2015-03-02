@@ -14,7 +14,12 @@ def main(workspace):
 
     datasets = []
 
+    name = os.environ.get('STAT')
+
     for importer, modname, ispkg in pkgutil.iter_modules(topics.__path__):
+        if name and not name == modname:
+            print "Skipping {} as single name {} specified".format(modname, name)
+            continue
         #if modname not in ['direct_access_audiology']:
         #    continue
 

@@ -35,6 +35,8 @@ def scrape(workspace):
     pass
 ```
 
+In general you should have your scrape.py fetch the data, and turn into a format that closely resembles the CKAN dataset dictionary.  The transform.py should apply anything to the datasets that applies to all of them, such as specific tags - as well as moving the resources to S3 (and changing the url field).  load.py should then be responsible for pushing the data to CKAN.  This last step will eventually be pushed up into the publish-o-matic library so that you can use a generic CKAN loader.
+
 ### What are the entry points and how are they launched
 
 To enable your scraper to be run, you need to add an entry in the setup.py file, which specifies the scraper name, and where the endpoints can be loaded from.  If you don't do this, your scraper won't be available.
