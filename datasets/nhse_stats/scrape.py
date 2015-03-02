@@ -15,8 +15,8 @@ def main(workspace):
     datasets = []
 
     for importer, modname, ispkg in pkgutil.iter_modules(topics.__path__):
-        if modname not in ['delayed_transfer']:
-            continue
+        #if modname not in ['direct_access_audiology']:
+        #    continue
 
         try:
             m = importer.find_module(modname).load_module(modname)
