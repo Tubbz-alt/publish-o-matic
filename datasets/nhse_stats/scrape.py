@@ -15,7 +15,7 @@ def main(workspace):
     datasets = []
 
     for importer, modname, ispkg in pkgutil.iter_modules(topics.__path__):
-        if modname not in ['ccc']:
+        if modname not in ['delayed_transfer']:
             continue
 
         try:

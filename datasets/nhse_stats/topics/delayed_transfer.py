@@ -12,7 +12,7 @@ import slugify
 from publish.lib.helpers import to_markdown, anchor_to_resource, hd, tl
 
 
-ROOT = "http://www.england.nhs.uk/statistics/statistical-work-areas/critical-care-capacity/"
+ROOT = "http://www.england.nhs.uk/statistics/statistical-work-areas/delayed-transfers-of-care/"
 DEFAULT_NOTES = None
 YEAR_MATCH = re.compile(".*(\d{4}).*")
 
@@ -43,7 +43,7 @@ def get_time_series(h3, url):
     print "Time series..."
 
     dataset = {
-        "title": "Critical Care Bed Capacity and Urgent Operations Cancelled - Time Series",
+        "title": "Delayed Transfers of Care - Time Series",
         "resources": [anchor_to_resource(l) for l in h3.getnext().cssselect('a')],
         "notes": DEFAULT_NOTES,
         "origin": url,
@@ -71,7 +71,7 @@ def add_year_block(header, url):
     month = filter(lambda x: x in string.printable, m.groups()[0].strip())
 
     dataset = {
-        "title": u"Critical Care Bed Capacity and Urgent Operations Cancelled - {} {}".format(month, year),
+        "title": u"Delayed Transfers of Care - {} {}".format(month, year),
         "resources": [anchor_to_resource(l) for l in links],
         "notes": DEFAULT_NOTES,
         "origin": url,
@@ -139,19 +139,33 @@ def scrape_page(url):
 
 
 def scrape(workspace):
-    print "Scraping Critical Care Capacity {}".format(workspace)
+    print "Scraping Delayed Transfer {}".format(workspace)
+    global DEFAULT_NOTES
 
     html = requests.get(ROOT)
     page = fromstring(html.content)
     default_notes(page)
 
-    h3 = hd([h for h in page.cssselect('h3') if h.text_content().strip() == 'Latest Data'])
+    h3 = hd([h for h in page.cssselect('h3') if h.text_content().strip() == 'Data'])
     links = h3.getnext().cssselect('a')
 
     datasets = []
     datasets.extend(scrape_page(links[-1].get("href")))
     for l in links:
         datasets.extend(scrape_page(l.get("href")))
+
+    # Get the annual statistical reports
+    h3 = hd([h for h in page.cssselect('h3') if h.text_content().strip() == 'Annual Statistical Report'])
+    links = h3.getnext().cssselect('a')
+    dataset = {
+        "resources": [anchor_to_resource(l) for l in links],
+        "title": "Delayed Transfers of Care - Annual Statistical Reports",
+        "origin": ROOT,
+        "notes": DEFAULT_NOTES,
+        "frequency": "Annually"
+    }
+    dataset["name"] = slugify.slugify(dataset["title"]).lower()
+    datasets.append(dataset)
 
     datasets = filter(lambda x: x is not None, datasets)
     print "Processed {} datasets".format(len(datasets))
