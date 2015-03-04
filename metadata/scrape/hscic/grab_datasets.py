@@ -22,7 +22,7 @@ logging.basicConfig(filename='datasets.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     level=logging.DEBUG)
 
-requests_cache.install_cache('scraper_cache', expire_after=84200)
+requests_cache.install_cache('scraper_cache', expire_after=84200*3)
 
 def get_query_dict(query):
     """

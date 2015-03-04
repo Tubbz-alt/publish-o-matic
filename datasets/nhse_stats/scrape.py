@@ -20,8 +20,9 @@ def main(workspace):
         if name and not name == modname:
             print "Skipping {} as single name {} specified".format(modname, name)
             continue
-        #if modname not in ['direct_access_audiology']:
-        #    continue
+
+        if modname not in ['health_visitors']:
+            continue
 
         try:
             m = importer.find_module(modname).load_module(modname)
