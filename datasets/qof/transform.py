@@ -11,13 +11,12 @@ import re
 DATA_DIR = None
 
 def datasets():
-    for directory in DATA_DIR.ls():
-        print directory
-        metadata = directory/'dataset.metadata.json'
-        yield directory, metadata, metadata.json_load()
+    metadata = DATA_DIR / 'dataset.metadata.json'
+    return metadata.json_load()
 
 def add_metadata_to_qof_datasets():
-    for directory, metadata_file, metadata in datasets():
+    results = []
+    for metadata in datasets():
         metadata['tags'] = ['QOF', 'Quality Outcomes Framework']
         title = metadata['title']
         match = re.search('(\d{4})-(\d{2})', title)
@@ -28,9 +27,10 @@ def add_metadata_to_qof_datasets():
         metadata['frequency'] = 'yearly'
         metadata['title'] = 'QOF - National Quality Outcomes Framework - {0}-{1}'.format(match.group(1), match.group(2))
 
-        metadata_file.truncate()
-        metadata_file << json.dumps(metadata, indent=2)
-    return
+        results.append(metadata)
+
+    f = DATA_DIR / 'dataset.metadata.json'
+    json.dump(results, open(f, 'w'))
 
 def main(workspace):
     global DATA_DIR

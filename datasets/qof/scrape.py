@@ -87,30 +87,28 @@ def find_qof_datasets():
     return datasets
 
 def retrieve_qof_datasets(datasets):
-    u = Uploader("qof")
+    results = []
 
+    u = Uploader("qof")
     for dataset in datasets:
         print dataset['title']
-        dataset_dir = DATA_DIR/dataset['title']
-        dataset_dir.mkdir()
-        with dataset_dir:
-            for resource in dataset['resources']:
-                filename = filename_for_resource(resource)
-                path = dataset_dir / filename
+        for resource in dataset['resources']:
+            filename = filename_for_resource(resource)
+            path = DATA_DIR / filename
 
-                download_file(resource['url'], path)
-                print "Uploading to S3"
-                url = u.upload(path)
-                resource['url'] = url
-
-
-
-        metadata_file = dataset_dir/'dataset.metadata.json'
-        if metadata_file:
-            metadata_file.truncate()
-        metadata_file << json.dumps(dataset, indent=2)
+            download_file(resource['url'], path)
+            print "Uploading to S3"
+            url = u.upload(path)
+            resource['url'] = url
+        results.append(dataset)
 
     u.close()
+
+    metadata_file = DATA_DIR/'dataset.metadata.json'
+    if metadata_file:
+        metadata_file.truncate()
+    metadata_file << json.dumps(results, indent=2)
+
 
 
 def main(workspace):

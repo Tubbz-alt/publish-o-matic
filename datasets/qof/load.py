@@ -1,6 +1,7 @@
 """
 Load the QOF datasets into a CKAN instance
 """
+import json
 import sys
 
 import ckanapi
@@ -11,12 +12,10 @@ import slugify
 DATA_DIR = None
 
 def datasets():
-    for directory in DATA_DIR.ls():
-        metadata = directory/'dataset.metadata.json'
-        yield directory, metadata, metadata.json_load()
+    return json.loads(open(DATA_DIR / 'dataset.metadata.json').read())
 
 def load_qof():
-    for directory, metadata_file, metadata in datasets():
+    for metadata in datasets():
         resources = [
             dict(
                 description=r['description'],
@@ -26,7 +25,7 @@ def load_qof():
             )
             for r in metadata['resources']
         ]
-        print 'Creating', metadata['title']
+        print 'Creating', metadata['title'], "with {} resources".format(len(metadata['resources']))
         dc.Dataset.create_or_update(
             name=slugify.slugify(metadata['title']).lower(),
             title=metadata['title'],
@@ -44,6 +43,7 @@ def load_qof():
                 dict(key='publication_date', value=metadata['publication_date'])
             ]
         )
+        print "... done"
     return
 
 def group_qof():
