@@ -48,7 +48,7 @@ def load_qof():
 
 def group_qof():
     remaining = []
-    for _, _, metadata in datasets():
+    for metadata in datasets():
         dataset_name = slugify.slugify(metadata['title']).lower()
         try:
             dataset = dc.ckan.action.package_show(id=dataset_name)
