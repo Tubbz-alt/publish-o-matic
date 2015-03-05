@@ -1,3 +1,4 @@
+import collections
 import calendar
 import datetime
 import re
@@ -13,6 +14,7 @@ MONTH_YEAR_MATCHER = re.compile("(.*?)(\d{4}).*")
 INDICATIVE_DESC = None
 
 HISTORICAL = "http://www.england.nhs.uk/statistics/statistical-work-areas/health-visitors/indicative-health-visitor-collection-ihvc/historical-data/"
+METRICS_URL = "http://www.england.nhs.uk/statistics/statistical-work-areas/health-visitors/health-visitors-service-delivery-metrics/"
 
 def _is_header(element):
     return element.tag == 'p' and len(element.cssselect('strong')) > 0
@@ -98,10 +100,46 @@ def scrape_indicative():
     return datasets
 
 def scrape_metrics():
-    page = fromstring(
-        requests.get("http://www.england.nhs.uk/statistics/statistical-work-areas/health-visitors/health-visitors-service-delivery-metrics/").content,
-        encoding="utf8")
-    return []
+    datasets = []
+    page = fromstring(requests.get(METRICS_URL).content)
+
+    matcher = re.compile(".*Q(\d{1})\s(\d{4})-(\d{2}).*")
+
+    h1 = page.cssselect('h1')[1].getparent()
+    title = h1.text_content().strip()
+
+    desc = []
+    while True:
+        h1 = h1.getnext()
+        if len(h1.cssselect('strong')) > 0:
+            break
+        desc.append(tostring(h1))
+    description = to_markdown("".join(desc))
+
+    links = page.cssselect('p a')
+    unsorted_links = collections.defaultdict(list)
+    for l in links:
+        m = matcher.match(l.text_content())
+        if not m:
+            continue
+        k = "{}-{}".format(m.groups()[1], m.groups()[2])
+        unsorted_links[k].append( [l, m.groups()] )
+
+
+    for k, v in unsorted_links.iteritems():
+        dataset = {
+            "title": "{} {}".format(title, k),
+            "notes": description,
+            "origin": METRICS_URL,
+            "resources": [],
+            "frequency": "Quarterly"
+        }
+        dataset["name"] = slugify.slugify(dataset["title"]).lower()
+        for link, time_tuple in v:
+            dataset["resources"].append(anchor_to_resource(link))
+        datasets.append(dataset)
+
+    return datasets
 
 def scrape(workspace):
     print "Scraping Health Visitor Data with workspace {}".format(workspace)
@@ -109,7 +147,7 @@ def scrape(workspace):
 
     datasets.extend(scrape_indicative())
     datasets.extend(historical_indicative())
-#    datasets.extend(scrape_metrics())
+    datasets.extend(scrape_metrics())
 
     datasets = filter(lambda x: x is not None, datasets)
     return datasets
