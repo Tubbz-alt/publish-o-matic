@@ -21,7 +21,7 @@ def main(workspace):
             print "Skipping {} as single name {} specified".format(modname, name)
             continue
 
-        if modname not in ['dementia']:
+        if modname not in ['did']:
             continue
 
         try:
