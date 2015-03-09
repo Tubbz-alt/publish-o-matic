@@ -14,7 +14,10 @@ def tl(lst):
     return lst[1:] if len(lst) > 1 else None
 
 def get_dom(url):
-    html = requests.get(url).content
+    u = url
+    if (not u.startswith('http:')) and (not u.startswith('https:')):
+        u = "http:" + url
+    html = requests.get(u).content
     return fromstring(html)
 
 def anchor_to_resource(resource, post_create_func=None, title=None):
