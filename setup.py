@@ -48,6 +48,7 @@ setup(
             'ascof=datasets.ascof:entrypoints',
             'ccgois=datasets.ccgois:entrypoints',
             'hqip=datasets.hqip:entrypoints',
+            'hscic=datasets.hscic:entrypoints',
             'nhsof=datasets.nhsof:entrypoints',
             'ods=datasets.ods:entrypoints',
             'phof=datasets.phof:entrypoints',
