@@ -21,8 +21,8 @@ def main(workspace):
             print "Skipping {} as single name {} specified".format(modname, name)
             continue
 
-        if modname not in ['did']:
-            continue
+        #if modname not in ['archived_flu']:
+        #    continue
 
         try:
             m = importer.find_module(modname).load_module(modname)
