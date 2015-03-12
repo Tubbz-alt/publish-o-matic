@@ -42,7 +42,8 @@ setup(
     entry_points = {
         'console_scripts': [
             'crontool=publish.tools.crontool:main',
-            'run_scraper=publish.tools.run_scraper:main'
+            'run_scraper=publish.tools.run_scraper:main',
+            'fix_urls=publish.tools.url_fixer:main'
         ],
         'scrapers': [
             'ascof=datasets.ascof:entrypoints',

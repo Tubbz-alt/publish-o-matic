@@ -1,12 +1,12 @@
 
 
-#from load import main as main_load
-#from transform import main as main_transform
+from load import load
+from transform import transform
 from scrape import main as main_scrape
 
 def entrypoints():
     return {
         'scrape': main_scrape,
-        #'transform': main_transform,
-        #'load': main_load
+        'transform': transform,
+        'load': load
     }

@@ -78,21 +78,22 @@ def get_datasets_from_paginated_results(start_url):
         first_page_soup = BeautifulSoup(response.text)
         result.extend(get_datasets(first_page_soup))
         paging = first_page_soup.find(id='paging')
-        last_page_anchor = paging.find('a', 'last')
-        if last_page_anchor:
-            last_page = int(last_page_anchor.text)
-            logging.info('Number of pages is {}'.format(last_page))
-            # Iterate and parse them.
-            if last_page > 1:
-                for i in range(2, last_page+1):
-                    query['page'] = str(i)
-                    url = get_parsed_url(parsed, query)
-                    logging.info('Requesting {}'.format(url))
-                    response = requests.get(url)
-                    logging.info(response.status_code)
-                    if response.status_code < 400:
-                        soup = BeautifulSoup(response.text)
-                        result.extend(get_datasets(soup))
+        if paging:
+            last_page_anchor = paging.find('a', 'last')
+            if last_page_anchor:
+                last_page = int(last_page_anchor.text)
+                logging.info('Number of pages is {}'.format(last_page))
+                # Iterate and parse them.
+                if last_page > 1:
+                    for i in range(2, last_page+1):
+                        query['page'] = str(i)
+                        url = get_parsed_url(parsed, query)
+                        logging.info('Requesting {}'.format(url))
+                        response = requests.get(url)
+                        logging.info(response.status_code)
+                        if response.status_code < 400:
+                            soup = BeautifulSoup(response.text)
+                            result.extend(get_datasets(soup))
     logging.info('Number of datasets found: {}'.format(len(result)))
     return result
 
@@ -301,13 +302,13 @@ def scrape(workspace):
     filename = directory / 'datasets.json'
 
     print "Fetching keywords"
-    #keywords = get_keywords(os.path.join(directory, 'keywords.json'))
+    keywords = get_keywords(os.path.join(directory, 'keywords.json'))
     print "Fetching topics"
-    #topics = get_topics(os.path.join(directory, 'topics.json'))
+    topics = get_topics(os.path.join(directory, 'topics.json'))
     print "Fetching information types"
     information_types = get_info_types(directory/'info_types.json')
     datasets = {}
-    """
+
     for k in keywords:
         for dataset in keywords[k]:
             if dataset in datasets:
@@ -327,7 +328,6 @@ def scrape(workspace):
                 datasets[dataset] = {
                     'topics': [t, ],
                 }
-    """
     for i in information_types:
         for dataset in information_types[i]:
             if dataset in datasets:

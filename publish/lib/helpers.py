@@ -34,8 +34,7 @@ def anchor_to_resource(resource, post_create_func=None, title=None):
     return resource
 
 def filename_for_resource(resource):
-    hashed = hashlib.md5(resource['url'].encode('utf8', 'ignore')).hexdigest()
-    return "{}.{}".format(hashed, resource.get('format', 'bin').lower())
+    return resource['url'].encode('utf8', 'ignore').split('/')[-1]
 
 def download_file(url, target_file):
     with requests_cache.disabled():

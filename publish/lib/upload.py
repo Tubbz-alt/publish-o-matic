@@ -37,7 +37,6 @@ class Uploader(object):
         self.bucket = self.conn.get_bucket(self.bucket_name)
 
 
-
     def close(self):
         self.conn.close()
 
@@ -52,22 +51,16 @@ class Uploader(object):
             print local_file
         return None
 
-    def set_remote_hash(self, local_file, new_hash):
-        """ Sets the remote hash """
-        print "Setting remote hash for", local_file
-        remote_hash_name = "{}.hash".format(self.build_bucket_path(local_file))
-        k = s3key.Key(self.bucket)
-        k.key = remote_hash_name
-        k.set_contents_from_string(new_hash)
-
     def get_remote_hash(self, local_file):
         """ Gets the remote hash for a file, or None """
-        remote_hash_name = "{}.hash".format(self.build_bucket_path(local_file))
-        possible_key = self.bucket.get_key(remote_hash_name)
-        if not possible_key:
+        url = "https://{}.s3.amazonaws.com/{}".format(self.bucket_name,
+                                                       self.build_bucket_path(local_file))
+        h = requests.head(url)
+        etag = h.headers.get('etag')
+        if not etag:
             return None
 
-        return possible_key.get_contents_as_string()
+        return etag[1:-1]
 
     def write_file_to_bucket(self, local_file):
         path = self.build_bucket_path(local_file)
@@ -80,18 +73,14 @@ class Uploader(object):
 
     def upload(self, local_file):
         """ Returns the new URL of the uploaded file """
-
-        # TODO: Change the hashcheck to just do a head and use
-        # the etag header which is currently an MD5 of the file.
-
         local_hash = self.get_local_hash(local_file)
         remote_hash = self.get_remote_hash(local_file)
         print local_hash, remote_hash
         if not remote_hash or not local_hash == remote_hash:
             print "Remote_hash is :", remote_hash
             print "Local hash is : ", local_hash
-            self.set_remote_hash(local_file, local_hash)
             self.write_file_to_bucket(local_file)
+            remote_hash = local_hash
 
         return "https://{}.s3.amazonaws.com/{}".format(self.bucket_name,
                                                        self.build_bucket_path(local_file))

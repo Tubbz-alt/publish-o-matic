@@ -60,7 +60,8 @@ def main():
     if os.environ.get('REQ_DEV') == "1":
         import requests_cache
         print "Installing requests cache"
-        requests_cache.install_cache('scraper_cache', expire_after=84200)
+        timeout = 84200*7
+        requests_cache.install_cache('scraper_cache', expire_after=timeout)
 
     entry_points = get_scraper_entrypoints(scraper_name)
     workspace = get_or_create_workspace(scraper_name)
