@@ -22,6 +22,8 @@ logging.basicConfig(#filename='datasets.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     level=logging.DEBUG)
 
+NO_SOURCES = 0
+
 def get_query_dict(query):
     """
     Given a query string will return a dict representation thereof.
@@ -212,41 +214,43 @@ def get_dataset(dataset_id, dataset, directory):
     about the dataset will extract all the things from the dataset's page on
     HSCIC.
     """
+    global NO_SOURCES
     url_template = 'http://www.hscic.gov.uk/searchcatalogue?productid={}'
     cache = os.path.join(directory, '{}.html'.format(dataset_id))
-    html = ''
     url = url_template.format(dataset_id)
+    html = None
+    result = None
 
     print "Getting dataset ... {}".format(dataset_id)
-    if os.path.isfile(cache):
-        logging.info('Using cached records from {}'.format(cache))
-        html = open(cache).read()
-    else:
-        logging.info('Requesting {}'.format(url))
-        response = requests.get(url)
-        if response.status_code < 400:
-            html = response.text
-            with open(cache, 'wb') as output:
-                output.write(html.encode('utf-8'))
-    if html:
-        # Look up the data for the dataset from the var jsonProduct JSON
-        # blob.
-        dom = fromstring(html)
-        jsonProductList = [d for d in dom.cssselect('script') if 'jsonProduct' in d.text_content()]
-        if jsonProductList:
-            elem = jsonProductList[0].text_content().strip()
-            key = "var jsonProduct ="
-            code = elem[elem.index(key) + len(key): -1]
-            try:
-                json.loads(code)
-                print "+ Managed to load jsonProduct on {}".format(dataset_id)
-            except:
-                print "- Data wasn't loadable in {}".format(dataset_id)
-                print code.encode('utf8')
-        else:
-            print "- Data is missing from dataset_id {}".format(dataset_id)
+    response = requests.get(url)
+    if response.status_code < 400:
+        html = response.text
 
-        """
+    if not html:
+        return None
+
+    # Look up the data for the dataset from the var jsonProduct JSON
+    # blob.
+    dom = fromstring(html)
+    jsonProductList = [d for d in dom.cssselect('script') if 'jsonProduct' in d.text_content()]
+    if jsonProductList:
+        elem = jsonProductList[0].text_content().strip()
+        key = "var jsonProduct ="
+        code = elem[elem.index(key) + len(key): -1]
+        try:
+            result = json.loads(code)
+            print "+ Managed to load jsonProduct on {}".format(dataset_id)
+        except:
+            print "- jsonProduct wasn't loadable in {}".format(dataset_id)
+            result = None
+
+        if result and len(result['sources']) == 0:
+            NO_SOURCES += 1
+            print " - jsonProduct has no sources!"
+            result = None
+
+    if not result:
+        print "- Parsing data manually from dataset_id {}".format(dataset_id)
         soup = BeautifulSoup(html)
         title = soup.find(id='headingtext').text.strip()
         logging.info(title)
@@ -289,15 +293,16 @@ def get_dataset(dataset_id, dataset, directory):
         geo = [x.text for x in coverage]
         if geo:
             dataset['geographical_coverage'] = geo
-        """
-        return dataset
+        result = dataset
 
-    return None
+
+    return result
 
 def scrape(workspace):
+    global NO_SOURCES
 
     result = []
-    directory = ffs.Path(workspace) / 'datasets_raw'
+    directory = ffs.Path(workspace)
     directory.mkdir()
     filename = directory / 'datasets.json'
 
@@ -340,9 +345,16 @@ def scrape(workspace):
                     'information_types': [i, ],
                 }
     print('Processing {} datasets'.format(len(datasets)))
+    total = len(datasets)
+    current = 0
     for k, v in datasets.iteritems():
+        current += 1
+        if current == 100:
+            break
+        print "Getting {}/{}".format(current, total)
         data = get_dataset(k, v, directory)
         if data:
             result.append(data)
     json.dump(result, open(filename, 'wb'), indent=2)
     logging.info('Written results to {}'.format(filename))
+    print "Found {} datasets where json did not have sources".format(NO_SOURCES)

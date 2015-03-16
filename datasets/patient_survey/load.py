@@ -72,3 +72,4 @@ def main(workspace):
     datasets = sorted(datasets, key=year_as_key)
     for dataset in datasets:
         load_statistic(dataset, DATA_DIR)
+        groups(dataset)

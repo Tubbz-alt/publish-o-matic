@@ -18,8 +18,7 @@ from bs4 import BeautifulSoup
 
 import ffs
 
-logging.basicConfig(filename='indicators.log',
-                    format='%(asctime)s %(levelname)s: %(message)s',
+logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
                     level=logging.DEBUG)
 
 
@@ -32,18 +31,17 @@ def get_indicator(i, directory):
     the request will be cached by requests-cache, so we don't need to cache it
     outselves.
     """
-    logging.info('Indicator ID: {}'.format(i))
+    print 'Indicator ID: {}'.format(i)
 
     url = URL_TEMPLATE.format(i)
-    logging.info('Requesting {}'.format(url))
+    print '  Requesting {}'.format(url)
     response = requests.get(url)
-    logging.info(response.status_code)
     if response.status_code < 400:
         html = response.text
 
     result = {}
     if html:
-        logging.info('Got HTML')
+        print '  Got HTML'
         soup = BeautifulSoup(html)
         data = soup.find(id="metadata")
         children = []
@@ -95,10 +93,11 @@ def get_indicator(i, directory):
 
 def scrape(workspace):
     result = []
-
+    print "scrape"
     directory = ffs.Path(workspace) / 'indicators_raw'
     directory.mkdir()
     filename = directory / 'indicators.json'
+    print "Fetching indicators"
     for i in range(1, 1699):
         indicator = get_indicator(i, directory)
         if indicator:
