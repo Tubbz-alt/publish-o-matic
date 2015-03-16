@@ -349,8 +349,6 @@ def scrape(workspace):
     current = 0
     for k, v in datasets.iteritems():
         current += 1
-        if current == 100:
-            break
         print "Getting {}/{}".format(current, total)
         data = get_dataset(k, v, directory)
         if data:

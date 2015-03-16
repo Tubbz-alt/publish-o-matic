@@ -101,9 +101,6 @@ def publish_datasets(start_from=0):
 
                 resources.append(resource)
 
-            if not 'indicators' in dataset['keywords']:
-                dataset['keywords'].append('indicators')
-
             notes = dataset['summary']
             if 'key_facts' in dataset:
                 notes += '\n\n<h2>KEY FACTS:</h2>\n' + ''.join(dataset['key_facts'])
@@ -134,6 +131,6 @@ def load(workspace):
     DATA_DIR.mkdir()
 
     dc.ensure_publisher('hscic')
-    #publish_indicators( 0) #266)
+    publish_indicators( 0) #266)
     publish_datasets()
     return 0

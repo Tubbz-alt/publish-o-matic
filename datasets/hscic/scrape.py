@@ -6,5 +6,5 @@ from datasets.hscic.hscic_indicators import scrape as indicators_scrape
 
 
 def main(workspace):
-    #datasets_scrape(workspace)
+    datasets_scrape(workspace)
     indicators_scrape(workspace)
