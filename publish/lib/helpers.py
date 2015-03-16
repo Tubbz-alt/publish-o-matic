@@ -3,6 +3,7 @@ import html2text
 import os
 import requests
 import requests_cache
+from urllib import unquote
 from lxml.html import fromstring
 
 def hd(lst):
@@ -34,7 +35,12 @@ def anchor_to_resource(resource, post_create_func=None, title=None):
     return resource
 
 def filename_for_resource(resource):
-    return resource['url'].encode('utf8', 'ignore').split('/')[-1]
+    """
+    Converts a URL into the name for a local file by pulling the remote
+    filename and decoding any escaped characters (such as %20)
+    """
+    name = resource['url'].encode('utf8', 'ignore').split('/')[-1]
+    return unquote(name)
 
 def download_file(url, target_file):
     with requests_cache.disabled():

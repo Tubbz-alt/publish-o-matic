@@ -291,8 +291,8 @@ def get_dataset(dataset_id, dataset, directory):
             dataset['geographical_coverage'] = geo
         """
         return dataset
-    else:
-        return None
+
+    return None
 
 def scrape(workspace):
 
