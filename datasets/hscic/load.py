@@ -132,6 +132,10 @@ def publish_datasets(start_from=0):
 
                 resources.append(resource)
 
+            if not resources:
+                print "Dataset {} does not have any resources".format(dataset['id'])
+                continue
+
             title = dataset['title']
 
             c = Curator(dataset)

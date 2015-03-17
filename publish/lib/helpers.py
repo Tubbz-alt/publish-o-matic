@@ -57,7 +57,8 @@ def download_file(url, target_file):
             r = requests.get(unicode(url), stream=True)
         except:
             raise
-        if r.status_code > 500:
+
+        if r.status_code >= 400:
             raise IOError("Failed to get a response from the server")
 
         m = hashlib.md5()
