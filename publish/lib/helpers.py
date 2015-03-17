@@ -5,6 +5,7 @@ import requests
 import requests_cache
 from urllib import unquote
 from lxml.html import fromstring
+from publish.lib.encoding import fix_bad_unicode
 
 def hd(lst):
     """ Returns first element from list if it exists """
@@ -87,6 +88,6 @@ def remove_tables_from_dom(dom):
 def to_markdown(text):
     h = html2text.HTML2Text()
     h.ignore_images = True
-    txt = h.handle(text.decode('latin-1'))
+    txt = h.handle(fix_bad_unicode(unicode(text)))
     h.close()
     return txt
