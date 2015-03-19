@@ -113,8 +113,8 @@ def publish_datasets(start_from=0):
     logging.info('Processing {} indicators'.format(len(datasets)))
     logging.info('Starting from record {}'.format(start_from))
     for dataset in datasets[start_from:]:
-        print 'Processing {}'.format(dataset['title'])
-        print '  ID: {}'.format(dataset['id'])
+        #print u'Processing {}'.format(dataset['title'])
+        #print '  ID: {}'.format(dataset['id'])
         try:
             resources = []
             for s in dataset['sources']:
