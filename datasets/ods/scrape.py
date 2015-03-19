@@ -62,7 +62,7 @@ def build_resource(date, text, link):
 def build_desc_from_dom(desc_html):
     desc_dom = fromstring(desc_html)
     remove_tables_from_dom(desc_dom)
-    return to_markdown(tostring(desc_dom))
+    return to_markdown(tostring(desc_dom).decode('utf8'))
 
 def download_and_hash_file(dataset_name, url):
     folder = DATA_DIR / dataset_name
@@ -76,7 +76,7 @@ def download_and_hash_file(dataset_name, url):
 # Multi-datasets on a single page.... ugh
 ###############################################################################
 def build_dataset(header, desc, table_rows):
-    desc_html = to_markdown("\n".join(desc))
+    desc_html = to_markdown("\n".join(desc).decode('utf8'))
 
     metadata = {
         "name": "{}-{}".format(PREFIX.lower(), slugify.slugify(header).lower()),
