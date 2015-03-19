@@ -19,6 +19,18 @@ logging.basicConfig(filename='publish.log',
 
 DATA_DIR = None
 
+def clean_tag(t):
+    t = t.replace('(', "").replace(")", "")
+    t = t.replace('A+E', "A and E")
+    t = t.replace('ST&amp', "")
+    t = t.replace('A&amp', "A and")
+    if ';' in t:
+        return [s.strip() for s in t.split(';')]
+    elif '/' in t:
+        return [s.strip() for s in t.split('/')]
+    return [t.replace('&', '-and-')]
+
+
 def publish_indicators(start_from=0):
     global DATA_DIR
     u = Uploader("hscic-indicators")
@@ -29,8 +41,6 @@ def publish_indicators(start_from=0):
     logging.info('Processing {} indicators'.format(len(indicators)))
     logging.info('Starting from record {}'.format(start_from))
     for indicator in indicators[start_from:]:
-        #print u'Processing {}'.format(indicator['title'])
-        #print ' ID: {}'.format(indicator['unique identifier'].lower())
         try:
             resources = []
             for s in indicator['sources']:
@@ -62,6 +72,12 @@ def publish_indicators(start_from=0):
             if prefix:
                 title = u"{} - {}".format(prefix, title)
 
+            tags = []
+            if 'keyword(s)' in dataset:
+                dataset['keywords'] = sum([clean_tag(k) for k in indicator.get('keyword(s)',[]) if len(k) > 2], [])
+                tags = dc.tags(*dataset['keywords'])
+
+
             print '+ Create/Update dataset {}'.format(indicator['title'])
             dc.Dataset.create_or_update(
                 name=slugify.slugify(title).lower()[:99],
@@ -70,7 +86,7 @@ def publish_indicators(start_from=0):
                 licence_id='ogl',
                 notes=to_markdown(indicator['definition'].encode('utf8')),
                 url='https://indicators.ic.nhs.uk/webview/',
-                tags=dc.tags(*indicator['keyword(s)']),
+                tags=dc.tags(tags),
                 resources=resources,
                 owner_org='hscic'
             )
@@ -112,7 +128,15 @@ def publish_datasets(start_from=0):
     datasets = datasetfile.json_load()
     logging.info('Processing {} indicators'.format(len(datasets)))
     logging.info('Starting from record {}'.format(start_from))
+
+    import random
+    total = len(datasets) - start_from
+    current = 1
+
     for dataset in datasets[start_from:]:
+        print "STATUS: {}/{}".format(current, total)
+        current += 1
+
         #print u'Processing {}'.format(dataset['title'])
         #print '  ID: {}'.format(dataset['id'])
         try:
@@ -124,12 +148,12 @@ def publish_datasets(start_from=0):
                         "format": s['filetype'],
                         "url": s["url"]
                 }
-
+                """
                 filename = filename_for_resource(resource)
                 path = DATA_DIR / filename
                 download_file(resource['url'], path)
                 resource['url'] = u.upload(path)
-
+                """
                 resources.append(resource)
 
             if not resources:
@@ -145,18 +169,11 @@ def publish_datasets(start_from=0):
                 title = u"{} - {}".format(prefix, title)
             name = slugify.slugify(title).lower()[0:99]
 
-            def clean_tag(t):
-                if ';' in t:
-                    return [s.strip() for s in t.split(';')]
-                elif '/' in t:
-                    return [s.strip() for s in t.split('/')]
-                return [t.replace('&', '-and-')]
-
             # Call cleantags on each work and expect back a list, which is then flattened
 
             tags = []
             if 'keywords' in dataset:
-                dataset['keywords'] = sum([clean_tag(k) for k in dataset.get('keywords',[])], [])
+                dataset['keywords'] = sum([clean_tag(k) for k in dataset.get('keywords',[]) if len(k) > 2], [])
                 tags = dc.tags(*dataset['keywords'])
 
             notes = dataset['summary']
@@ -201,7 +218,6 @@ def publish_datasets(start_from=0):
         except Exception as ex:
             import traceback
             traceback.print_exc()
-            import sys; sys.exit(1)
 
     u.close()
     return
@@ -213,5 +229,5 @@ def load(workspace):
 
     dc.ensure_publisher('hscic')
 #    publish_indicators( 0) #266)
-    publish_datasets()
+    publish_datasets(0)
     return 0

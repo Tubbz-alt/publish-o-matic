@@ -12,7 +12,7 @@ class Curator(object):
         self.dataset = dataset
         self.tags = []
         self.groups = []
-        self.types = ['CCGOIS', 'NHSOF', 'HES']
+        self.types = ['CCGOIS', 'NHSOF', 'HES', 'SHMI', 'IAPT']
 
     def get_tags(self):
         if self.tags:
@@ -30,8 +30,15 @@ class Curator(object):
         if self.groups:
             return self.groups
 
+        if 'Improving Access to Psychological Therapies' in self.dataset['title']:
+            self.groups.append('IAPT')
+
+
         if 'Hospital Episode Statistics' in self.dataset['title']:
             self.groups.append('HES')
+
+        if 'SHMI' in self.dataset['title']:
+            self.groups.append('SHMI')
 
         # Check indicator specific data....
         firsturl = hd([s['url'] for s in self.dataset.get('sources',[]) if s['description'] == 'Indicator specification'])
@@ -44,6 +51,8 @@ class Curator(object):
         for a in self.dataset.get('sources', []):
             if 'Quality and Outcomes Framework' in a['description']:
                 self.groups.append('QOF')
+
+        self.groups = list(set(self.groups))
 
         if self.groups:
             print "***" * 20
