@@ -43,6 +43,7 @@ setup(
         'console_scripts': [
             'crontool=publish.tools.crontool:main',
             'run_scraper=publish.tools.run_scraper:main',
+            'unzipper=publish.tools.unzipper:main',
             'fix_urls=publish.tools.url_fixer:main'
         ],
         'scrapers': [
