@@ -19,16 +19,20 @@ logging.basicConfig(filename='publish.log',
 
 DATA_DIR = None
 
+# TODO: Change this to just strip punctuation and check length
 def clean_tag(t):
-    t = t.replace('(', "").replace(")", "")
+    def valid_only(tags):
+        return [tag for tag in tags if len(tag) > 2]
+
+    t = t.replace('(', "").replace(")", "").replace(':', "")
     t = t.replace('A+E', "A and E")
     t = t.replace('ST&amp', "")
     t = t.replace('A&amp', "A and")
     if ';' in t:
-        return [s.strip() for s in t.split(';')]
+        return valid_only([s.strip() for s in t.split(';')])
     elif '/' in t:
-        return [s.strip() for s in t.split('/')]
-    return [t.replace('&', '-and-')]
+        return valid_only([s.strip() for s in t.split('/')])
+    return valid_only([t.replace('&', '-and-')])
 
 
 def publish_indicators(start_from=0):
@@ -74,7 +78,7 @@ def publish_indicators(start_from=0):
 
             tags = []
             if 'keyword(s)' in dataset:
-                dataset['keywords'] = sum([clean_tag(k) for k in indicator.get('keyword(s)',[]) if len(k) > 2], [])
+                dataset['keyword(s)'] = sum([clean_tag(k) for k in indicator.get('keyword(s)',[]) if len(k) > 2], [])
                 tags = dc.tags(*dataset['keywords'])
 
 
