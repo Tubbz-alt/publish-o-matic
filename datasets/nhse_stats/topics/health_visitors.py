@@ -35,7 +35,8 @@ def make_dataset(txt, description, resources, url):
         "origin": url,
         "coverage_start_date": "{}-{}-01".format(year, month_pos),
         "coverage_end_date": "{}-{}-{}".format(year, month_pos, e),
-        "tags": ["IHVC"]
+        "tags": ["IHVC"],
+        "groups": ['health_visitors']
     }
 
     dataset["name"] = slugify.slugify(dataset["title"]).lower()

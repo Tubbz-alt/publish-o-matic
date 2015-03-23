@@ -1,4 +1,4 @@
-""" Scraper for http://www.england.nhs.uk/statistics/statistical-work-areas/critical-care-capacity/ """
+""" Scraper for http://www.england.nhs.uk/statistics/statistical-work-areas/delayed-transfers-of-care/ """
 
 import calendar
 import datetime
@@ -75,7 +75,8 @@ def add_year_block(header, url):
         "resources": [anchor_to_resource(l) for l in links],
         "notes": DEFAULT_NOTES,
         "origin": url,
-        "frequency": "Monthly"
+        "frequency": "Monthly",
+        "groups": ['delayed_transfer']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 
@@ -94,7 +95,8 @@ def add_singles(page, url):
         "resources": [],
         "notes": DEFAULT_NOTES,
         "frequency": "Monthly",
-        "origin": url
+        "origin": url,
+        "groups": ['delayed_transfer']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 
@@ -162,7 +164,8 @@ def scrape(workspace):
         "title": "Delayed Transfers of Care - Annual Statistical Reports",
         "origin": ROOT,
         "notes": DEFAULT_NOTES,
-        "frequency": "Annually"
+        "frequency": "Annually",
+        "groups": ['delayed_transfer']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
     datasets.append(dataset)

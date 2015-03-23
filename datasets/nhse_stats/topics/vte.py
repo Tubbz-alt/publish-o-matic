@@ -70,7 +70,8 @@ def scrape_page(url):
         "origin": url,
         "coverage_start_date": "{}-04-01".format(start_year),
         "coverage_end_date": "{}-03-31".format(end_year),
-        "tags": ["VTE"]
+        "tags": ["VTE"],
+        "groups": ["vte"]
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 

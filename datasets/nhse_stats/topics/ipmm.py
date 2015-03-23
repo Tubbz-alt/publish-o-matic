@@ -63,7 +63,8 @@ def scrape_page(url):
             "resources": [anchor_to_resource(a) for a in links],
             "coverage_start_date": "{}-04-01".format(year_start),
             "coverage_end_date": "{}-03-31".format(year_start+1),
-            "frequency": "Annual"
+            "frequency": "Annually",
+            "groups": ['ipmm']
         }
         datasets.append(dataset)
 

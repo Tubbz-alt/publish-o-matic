@@ -55,6 +55,7 @@ def scrape_page(url, title=None):
         "origin": url,
         "tags": ["diagnostic imaging"],
         "resources": [anchor_to_resource(l) for l in links],
+        "groups": ['did']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 

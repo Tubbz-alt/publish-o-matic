@@ -36,7 +36,7 @@ def historical_beds(page, url, title):
     dataset["name"] = slugify.slugify(title).lower()
     dataset["resources"] = [anchor_to_resource(a) for a in sublinks]
     dataset["notes"] = desc
-
+    dataset["groups"] = ['bed_availability']
     return dataset
 
 def current_beds(page, url, title):
@@ -70,6 +70,7 @@ def current_beds(page, url, title):
         dataset["tags"] = ["bed availability"]
         dataset["notes"] = desc
         dataset["resources"] = grouped[y]
+        dataset["groups"] = ['bed_availability']
         datasets.append(dataset)
 
 

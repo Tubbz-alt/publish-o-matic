@@ -14,7 +14,7 @@ import requests
 import slugify
 
 from publish.lib.helpers import to_markdown
-
+from publish.lib.encoding import fix_bad_unicode
 
 MONTH_DATE_RANGE_RE = re.compile(".*,\s(.*)\sto\s(.*)\s(\d{4}).*")
 DATE_RANGE_RE = re.compile(".*Q(\d)\s(\d{4}).*(\d{2})")
@@ -100,10 +100,11 @@ def scrape_commissioner_page(link):
 
     dataset['title'] = title
     dataset['name'] = slugify.slugify(title).lower()
-    dataset["notes"] = to_markdown( tostring(div.cssselect('article p')[0]) )
+    dataset["notes"] = to_markdown( fix_bad_unicode(unicode(tostring(div.cssselect('article p')[0]))) )
     dataset["tags"] = ["CWT"]
     dataset["resources"] = resources
     dataset["origin"] = link.get('href')
+    dataset["groups"] = ['cwt']
     if drs:
         dataset["coverage_start_date"] = drs
     if dre:

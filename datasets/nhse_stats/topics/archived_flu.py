@@ -24,7 +24,8 @@ def scrape_block(block, title):
         "notes": DESCRIPTION,
         "tags": ["sitrep", "winter"],
         "origin": ROOT,
-        "resources": [anchor_to_resource(a) for a in block.cssselect('.itemLinks li a')]
+        "resources": [anchor_to_resource(a) for a in block.cssselect('.itemLinks li a')],
+        "groups": ['winter']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
     for r in dataset["resources"]:
@@ -38,7 +39,7 @@ def scrape(workspace):
 
     page = get_dom(ROOT)
 
-    DESCRIPTION = to_markdown(page.cssselect('.introText')[0].text_content().strip().encode('utf8'))
+    DESCRIPTION = to_markdown(unicode(page.cssselect('.introText')[0].text_content().strip()))
 
     containers = page.cssselect('.itemContainer')[1:]
     datasets.append(scrape_block(containers[0], "Daily Hospital Situation Report 2011-12"))
@@ -47,4 +48,5 @@ def scrape(workspace):
     datasets.append(scrape_block(containers[3], "Daily SitRep Guidance 2011-12"))
 
     datasets = filter(lambda x: x is not None, datasets)
+    print "Found {} datasets".format(len(datasets))
     return datasets

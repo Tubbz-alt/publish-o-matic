@@ -53,6 +53,7 @@ def scrape(workspace):
             "origin": ROOT,
             "notes": desc,
             "tags": ["audiology"],
+            "groups": ['direct_access_audiology']
         }
         s, e = date_range_from_string(title)
         dataset["coverage_start_date"] = s

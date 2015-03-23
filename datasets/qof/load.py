@@ -36,10 +36,10 @@ def load_qof():
             tags=dc.tags(*metadata['tags']),
             resources=resources,
             owner_org='hscic',
+            frequency=metadata['frequency'],
             extras=[
                 dict(key='coverage_start_date', value=metadata['coverage_start_date']),
                 dict(key='coverage_end_date', value=metadata['coverage_end_date']),
-                dict(key='frequency', value=metadata['frequency']),
                 dict(key='publication_date', value=metadata['publication_date'])
             ]
         )

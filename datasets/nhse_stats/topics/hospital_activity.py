@@ -57,6 +57,7 @@ def process_monthly(page):
             "frequency": "Annual",
             "coverage_start_date": csd,
             "coverage_end_date": ced,
+            "groups": ['hospital_activity']
         }
         pdataset["name"] = slugify.slugify(pdataset["title"]).lower()
         datasets.append(pdataset)
@@ -74,6 +75,7 @@ def process_monthly(page):
             "frequency": "Annual",
             "coverage_start_date": csd,
             "coverage_end_date": ced,
+            "groups": ['hospital_activity']
         }
         cdataset["name"] = slugify.slugify(cdataset["title"]).lower()
         datasets.append(cdataset)
@@ -125,6 +127,7 @@ def process_block(block, provider_fn, commissioner_fn, title, desc, origin):
         "notes": desc,
         "coverage_start_date": csd,
         "coverage_end_date": ced,
+        "groups": ['hospital_activity']
     }
     pdataset["name"] = slugify.slugify(pdataset["title"]).lower()
 
@@ -135,6 +138,7 @@ def process_block(block, provider_fn, commissioner_fn, title, desc, origin):
         "notes": desc,
         "coverage_start_date": csd,
         "coverage_end_date": ced,
+        "groups": ['hospital_activity']
     }
     cdataset["name"] = slugify.slugify(cdataset["title"]).lower()
 

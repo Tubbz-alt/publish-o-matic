@@ -30,7 +30,7 @@ def _astree(url):
     content = resp.text
     dom = fromstring(content)
     dom.make_links_absolute(url)
-    return dom
+    return dom, url
 
 
 def process_link(link):
@@ -75,7 +75,7 @@ def download_and_hash_file(dataset_name, url):
 ###############################################################################
 # Multi-datasets on a single page.... ugh
 ###############################################################################
-def build_dataset(header, desc, table_rows):
+def build_dataset(header, desc, table_rows, url):
     desc_html = to_markdown("\n".join(desc).decode('utf8'))
 
     metadata = {
@@ -84,6 +84,7 @@ def build_dataset(header, desc, table_rows):
         "notes": desc_html,
         "coverage_start_date": "",
         "coverage_end_date": "",
+        "origin": url,
         "frequency": "",
         "tags": ["ODS", "Organisation Data Service"],
         "resources": []
@@ -113,7 +114,8 @@ def process_multi(dataset):
         followed by p tags
         until we find the table
     """
-    dom = _astree(dataset['url']).cssselect("#parent-fieldname-text")[0]
+    dom, url = _astree(dataset['url'])
+    dom = dom.cssselect("#parent-fieldname-text")[0]
 
     datasets = []
 
@@ -124,7 +126,7 @@ def process_multi(dataset):
     for element in dom:
         if element.tag.upper() == "H3":
             if h3 and table_rows:
-                datasets.append(build_dataset(h3, desc, table_rows))
+                datasets.append(build_dataset(h3, desc, table_rows, url))
             h3 = element.text_content().strip()
             desc = []
             table_rows = None
@@ -137,7 +139,7 @@ def process_multi(dataset):
             table_rows = element.cssselect("tr")[1:]
 
     if h3 and table_rows:
-        datasets.append(build_dataset(h3, desc, table_rows))
+        datasets.append(build_dataset(h3, desc, table_rows, url))
 
     return datasets
 
@@ -150,7 +152,7 @@ def process_dataset(dataset):
     if dataset.get("multi", False):
         return process_multi(dataset)
 
-    dom = _astree(dataset['url'])
+    dom, source = _astree(dataset['url'])
     title = dom.xpath(dataset['title'])[0].text_content().strip()
 
     desc_html = "\n".join(tostring(dom.xpath(x)[0]) for x in dataset['description'])
@@ -163,6 +165,7 @@ def process_dataset(dataset):
         "coverage_start_date": "",
         "coverage_end_date": "",
         "frequency": "",
+        "origin": source,
         'tags': ["ODS", "Organisation Data Service"]
     }
 

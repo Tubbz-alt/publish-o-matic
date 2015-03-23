@@ -65,7 +65,7 @@ def create_dataset(title, description, links):
     dataset["coverage_start_date"] = string_to_date(title)
     dataset["coverage_end_date"] = string_to_date(title,start=False)
     dataset["frequency"] = "Monthly"
-
+    dataset["groups"] = ["rtt"]
     for resource in links:
         dataset["resources"].append(anchor_to_resource(resource))
 

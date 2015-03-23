@@ -39,6 +39,7 @@ def scrape_page(url):
         "origin": url,
         "coverage_start_date": "{}-11-01".format(year),
         "coverage_end_date": "{}-03-01".format(year+1),
+        "groups": ["winter"]
     }
 
     return dataset

@@ -1,9 +1,7 @@
 """ Scraper for http://www.england.nhs.uk/statistics/statistical-work-areas/critical-care-capacity/ """
-
 import calendar
 import datetime
 import re
-
 
 from lxml.html import fromstring, tostring
 import requests
@@ -47,6 +45,7 @@ def get_time_series(h3, url):
         "resources": [anchor_to_resource(l) for l in h3.getnext().cssselect('a')],
         "notes": DEFAULT_NOTES,
         "origin": url,
+        "groups": ['ccc']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
     return dataset
@@ -75,7 +74,8 @@ def add_year_block(header, url):
         "resources": [anchor_to_resource(l) for l in links],
         "notes": DEFAULT_NOTES,
         "origin": url,
-        "frequency": "Monthly"
+        "frequency": "Monthly",
+        "groups": ['ccc']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 
@@ -94,7 +94,8 @@ def add_singles(page, url):
         "resources": [],
         "notes": DEFAULT_NOTES,
         "frequency": "Monthly",
-        "origin": url
+        "origin": url,
+        "groups": ['ccc']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 

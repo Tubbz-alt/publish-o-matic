@@ -51,7 +51,6 @@ def get_time_series(h3, url):
         "origin": url,
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
-
     return dataset
 
 def add_year_block(header, url):
@@ -69,16 +68,21 @@ def add_year_block(header, url):
             break
         links.extend(h3.cssselect('a'))
 
+    from publish.lib.encoding import fix_bad_unicode
+    txt = fix_bad_unicode(unicode(header.text_content().strip()))
+
     dataset = {
-        "title": "A&E Attendances and Emergency Admissions - {}".format(header.text_content().strip()),
+        "title": u"A&E Attendances and Emergency Admissions - {}".format(txt),
         "resources": [anchor_to_resource(l) for l in links],
         "notes": DEFAULT_NOTES,
         "origin": url,
-        "frequency": "Weekly"
+        "frequency": "Weekly",
+        "groups": ['a_and_e']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 
-    mnth = list(calendar.month_name).index(m.groups()[0].strip())
+    mname = m.groups()[0].strip().encode('ascii', 'ignore')
+    mnth = list(calendar.month_name).index(mname)
     _, e = calendar.monthrange(int(m.groups()[1]), mnth )
     dataset['coverage_start_date'] = "{}-{}-01".format(m.groups()[1].strip(), mnth)
     dataset['coverage_end_date'] = "{}-{}-{}".format(m.groups()[1].strip(), mnth, e)
@@ -120,7 +124,11 @@ def scrape(workspace):
 
     datasets = []
     for l in links:
-        datasets.extend(scrape_page(l.get("href")))
+        try:
+            datasets.extend(scrape_page(l.get("href")))
+        except:
+            import traceback
+            traceback.print_exc()
 
     datasets = filter(lambda x: x is not None, datasets)
     print "Processed {} datasets".format(len(datasets))

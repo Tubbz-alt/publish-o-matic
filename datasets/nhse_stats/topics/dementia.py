@@ -28,7 +28,9 @@ def scrape(workspace):
     page = get_dom(ROOT)
     pages = page.cssselect('.center h3 a')
     for p in pages:
-        datasets.append(scrape_page(p.get('href')))
+        ds = scrape_page(p.get('href'))
+        ds["groups"] = ['dementia']
+        datasets.append(ds)
 
 
     datasets = filter(lambda x: x is not None, datasets)

@@ -43,7 +43,8 @@ def month(url, desc):
             "origin": url,
             "tags": ["statistics", "diagnostics"],
             "notes": desc,
-            "resources": [anchor_to_resource(a) for a in trimmed_links]
+            "resources": [anchor_to_resource(a) for a in trimmed_links],
+            "groups": ['mdd']
         }
         dataset["name"] = slugify.slugify(dataset["title"]).lower()
         datasets.append(dataset)
@@ -57,6 +58,7 @@ def month(url, desc):
             "origin": url,
             "tags": ["statistics", "diagnostics"],
             "notes": desc,
+            "groups": ['mdd']
         }
         dataset["name"] = slugify.slugify(dataset["title"]).lower()
         dataset["coverage_start_date"],dataset["coverage_end_date"] = date_range_from_string(when.groups()[0])
@@ -81,7 +83,8 @@ def guidance(page):
         "title": "Monthly Diagnostic Waiting Times and Activity - Guidance and Documentation",
         "origin": "http://www.england.nhs.uk/statistics/statistical-work-areas/diagnostics-waiting-times-and-activity/monthly-diagnostics-waiting-times-and-activity/",
         "tags": ["waiting times", "statistics"],
-        "notes": ""
+        "notes": "",
+        "groups": ['mdd']
     }
     dataset['name'] = slugify.slugify(dataset['title']).lower()
 

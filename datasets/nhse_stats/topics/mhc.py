@@ -38,7 +38,7 @@ def process_para(para, notes):
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
     dataset["origin"] = "http://www.england.nhs.uk/statistics/statistical-work-areas/mental-health-community-teams-activity/"
     dataset["notes"] = notes
-
+    dataset['groups'] = ['mhc']
     links = para.cssselect('a')
     dataset['resources'] = [anchor_to_resource(l) for l in links]
 

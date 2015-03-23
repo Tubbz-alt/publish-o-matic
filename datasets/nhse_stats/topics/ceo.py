@@ -49,6 +49,7 @@ def process_dataset(title, links, notes):
     dataset['origin'] = ROOT
     dataset['resources'] = [anchor_to_resource(r) for r in links]
     dataset['tags'] = ['elective']
+    dataset["groups"] = ['ceo']
     return dataset
 
 def scrape(workspace):

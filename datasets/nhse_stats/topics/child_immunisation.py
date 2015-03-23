@@ -10,6 +10,7 @@ import requests
 import slugify
 
 from publish.lib.helpers import to_markdown, anchor_to_resource, hd
+from publish.lib.encoding import fix_bad_unicode
 
 ROOT = "http://www.england.nhs.uk/statistics/statistical-work-areas/child-immunisation/"
 
@@ -43,13 +44,14 @@ def scrape(workspace):
 
     dataset = {
         "title": "Child Immunisation",
-        "notes": desc,
+        "notes": to_markdown(fix_bad_unicode(unicode(desc))),
         "coverage_start_date": "",
         "coverage_end_date": "",
         "resources": [],
         "frequency": "Quarterly",
         "origin": ROOT,
-        "tags": ["immunisation", "children"]
+        "tags": ["immunisation", "children"],
+        "groups": ['child_immunisation']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 

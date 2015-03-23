@@ -35,6 +35,7 @@ def scrape(workspace):
                  "infants who have been fully, partially or not at all breastfed "\
                  "at 6-8 weeks",
         "origin": ROOT,
+        "groups": ['maternity_breastfeeding']
     }
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
 

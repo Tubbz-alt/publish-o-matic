@@ -42,16 +42,20 @@ def load_statistic(dataset, directory):
     return False
 
 def groups(dataset):
+    groups = dataset.get('groups', [])
+
     dataset = dc.ckan.action.package_show(id=dataset["name"])
-    if [g for g in dataset['groups'] if g['name'].lower() == 'statistics']:
-        print 'Already in group', g['name']
-    else:
-        dc.ckan.action.member_create(
-            id='statistics',
-            object=dataset['name'],
-            object_type='package',
-            capacity='member'
-        )
+    for grp in groups:
+        if [g for g in dataset['groups'] if g['name'].lower() == grp]:
+            print 'Already in group', g['name']
+        else:
+            dc.ensure_group(grp)
+            dc.ckan.action.member_create(
+                id=grp,
+                object=dataset['name'],
+                object_type='package',
+                capacity='member'
+            )
     return
 
 def main(workspace):

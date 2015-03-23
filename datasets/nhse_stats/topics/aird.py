@@ -23,8 +23,8 @@ def process(page, url):
         "name": slugify.slugify(title).lower(),
         "origin": url,
         "notes": desc,
-        "resources": []
-
+        "resources": [],
+        "groups": ['aird'],
     }
 
     links = page.cssselect('.center p a')

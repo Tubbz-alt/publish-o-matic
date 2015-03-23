@@ -28,7 +28,8 @@ def process_block(p, title, description, current_year):
         "notes": description,
         "tags": ["Statistics", current_year],
         "resources": [],
-        "origin": "http://www.england.nhs.uk/statistics/statistical-work-areas/mixed-sex-accommodation/msa-data/"
+        "origin": "http://www.england.nhs.uk/statistics/statistical-work-areas/mixed-sex-accommodation/msa-data/",
+        "groups": ["msa"]
     }
 
     for resource in p.cssselect('a'):

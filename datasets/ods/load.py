@@ -45,14 +45,14 @@ def load_ods():
             state='active',
             license_id='uk-ogl',
             notes=metadata['notes'],
-            #url=metadata['source'],
+            origin=metadata['origin'],
             tags=dc.tags(*metadata['tags']),
             resources=metadata["resources"],
             owner_org='hscic',
+            frequency=metadata['frequency'],
             extras=[
                 dict(key='coverage_start_date', value=metadata['coverage_start_date']),
                 dict(key='coverage_end_date', value=metadata['coverage_end_date']),
-                dict(key='frequency', value=metadata['frequency']),
              #   dict(key='publication_date', value=metadata['publication_date'])
             ]
         )

@@ -24,7 +24,7 @@ def add_metadata_to_qof_datasets():
         ends = datetime.date(begins.year + 1, 3, 31)
         metadata['coverage_start_date'] = begins.isoformat()
         metadata['coverage_end_date'] = ends.isoformat()
-        metadata['frequency'] = 'yearly'
+        metadata['frequency'] = 'Annually'
         metadata['title'] = 'QOF - National Quality Outcomes Framework - {0}-{1}'.format(match.group(1), match.group(2))
 
         results.append(metadata)

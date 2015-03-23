@@ -31,10 +31,14 @@ def main(workspace):
             filename = filename_for_resource(resource)
             path = DATA_DIR / filename
 
-            download_file(resource['url'], path)
+            try:
+                download_file(resource['url'], path)
+            except:
+                continue
             print "Uploading to S3"
             url = u.upload(path)
             resource['url'] = url
+            resource['url_type'] = ''  # make sure we zap historical uploads
 
     u.close()
     json.dump(datasets, open(os.path.join(DATA_DIR, "metadata.json"), 'wb'))

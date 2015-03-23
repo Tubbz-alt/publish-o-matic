@@ -76,7 +76,7 @@ def process_single_indicator(anchor):
     s, e = date_range_from_title(dataset['title'])
     dataset['coverage_start_date'] = s
     dataset['coverage_end_date'] = e
-
+    dataset["groups"] =  ['aqi']
 
     # The notes/description are from h1 to the first <p><strong>....
     desc = []

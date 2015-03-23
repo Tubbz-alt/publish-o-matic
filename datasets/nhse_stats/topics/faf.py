@@ -12,6 +12,7 @@ import requests
 import slugify
 
 from publish.lib.helpers import to_markdown
+from publish.lib.encoding import fix_bad_unicode
 
 
 TITLE_ROOT = "Friends and Family Test"
@@ -39,7 +40,8 @@ def process_block(p, title, description, current_year):
         "notes": description,
         "tags": ["Friends and Family", "Statistics", current_year, title.replace('&',' and ')],
         "resources": [],
-        "origin": "http://www.england.nhs.uk/statistics/statistical-work-areas/friends-and-family-test"
+        "origin": "http://www.england.nhs.uk/statistics/statistical-work-areas/friends-and-family-test",
+        "groups": ['faf']
     }
 
     for resource in p.cssselect('a'):
@@ -137,7 +139,7 @@ def scrape(workspace):
             break
         num_p += 1
         description.append(tostring(p))
-    description = to_markdown(''.join(description))
+    description = to_markdown(fix_bad_unicode(unicode(''.join(description))))
 
     # Process the individual datasets
     current_label = ""

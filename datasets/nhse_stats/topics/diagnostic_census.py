@@ -35,7 +35,7 @@ def process_para(para, desc):
     dataset["coverage_end_date"] = "{}-03-31".format(yeare)
     dataset["name"] = slugify.slugify(dataset["title"]).lower()
     dataset["resources"] = [anchor_to_resource(l) for l in links]
-
+    dataset["groups"] = ['diagnostic_census']
     return dataset
 
 def scrape(workspace):
