@@ -17,20 +17,19 @@ def load_dataset(dataset, directory):
             extras.append(dict(key='coverage_start_date', value=dataset['coverage_start_date']))
         if dataset.get('coverage_end_date', ''):
             extras.append(dict(key='coverage_end_date', value=dataset['coverage_end_date']))
-        if dataset.get('frequency', ''):
-            extras.append(dict(key='frequency', value=dataset['frequency']))
 
         dc.Dataset.create_or_update(
             name=dataset['name'],
             title=dataset['title'],
             state='active',
-            licence_id='ogl',
+            license_id='uk-ogl',
             notes=dataset['notes'],
-            url=dataset['origin'],
+            origin=dataset['origin'],
             tags=dc.tags(*dataset['tags']),
             resources=dataset["resources"],
             owner_org='nhs-england',
             extras=extras,
+            frequency='Annually'
         )
         return True
     except Exception, e:

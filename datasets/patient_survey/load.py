@@ -29,13 +29,14 @@ def load_statistic(dataset, directory):
             name=dataset['name'],
             title=dataset['title'],
             state='active',
-            licence_id='ogl',
+            license_id='uk-ogl',
             notes=dataset['notes'],
-            url=dataset['origin'],
+            origin=dataset['origin'],
             tags=dc.tags(*dataset['tags']),
             resources=dataset["resources"],
             owner_org='gp-survey',
             extras=extras,
+            frequency='Monthly'
         )
         return True
     except Exception, e:

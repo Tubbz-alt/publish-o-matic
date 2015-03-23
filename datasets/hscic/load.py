@@ -72,6 +72,10 @@ def publish_indicators(start_from=0):
 
             c = Curator(indicator)
             groups = c.get_groups()
+            if not groups:
+                print "Not in a group"
+                continue
+
             prefix = c.get_title_prefix()
             if prefix:
                 title = u"{} - {}".format(prefix, title)
@@ -168,6 +172,10 @@ def publish_datasets(start_from=0):
 
             c = Curator(dataset)
             groups = c.get_groups()
+            if not groups:
+                print "Not in a group"
+                continue
+
             prefix = c.get_title_prefix()
             if prefix:
                 title = u"{} - {}".format(prefix, title)
@@ -232,6 +240,6 @@ def load(workspace):
     DATA_DIR.mkdir()
 
     dc.ensure_publisher('hscic')
-#    publish_indicators( 0) #266)
+    publish_indicators(0)
     publish_datasets(0)
     return 0

@@ -89,6 +89,6 @@ def remove_tables_from_dom(dom):
 def to_markdown(text):
     h = html2text.HTML2Text()
     h.ignore_images = True
-    txt = h.handle(fix_bad_unicode(unicode(text)))
+    txt = h.handle(fix_bad_unicode(unicode(text.replace(u'\xa0', u' '))))
     h.close()
     return txt

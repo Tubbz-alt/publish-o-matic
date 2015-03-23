@@ -24,11 +24,11 @@ def scrape_page(page, url):
 
     year = re.match('.*(\d{4}).*', dataset['title']).groups()[0]
     dataset["coverage_start_date"] = "{}-01-01".format(year)
-    dataset["coverage_env_date"] = "{}-12-31".format(year)
+    dataset["coverage_end_date"] = "{}-12-31".format(year)
 
     desc_node = page.cssselect('div.column-content p')
     if desc_node:
-        dataset["notes"] = hd(desc_node).text_content().encode('utf8')
+        dataset["notes"] = hd(desc_node).text_content()
     else:
         dataset["notes"] = "Results for the Staff Survey {year} can be seen below. "\
                            "We have released detailed spreadsheets showing key finding "\

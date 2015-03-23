@@ -37,7 +37,7 @@ def load_ccgois(datasets):
             state='active',
             license_id='uk-ogl',
             notes=metadata['description'],
-            url='https://indicators.ic.nhs.uk/webview/',
+            origin='https://indicators.ic.nhs.uk/webview/',
             tags=dc.tags(*metadata['keyword(s)']),
             resources=resources,
             #frequency=[metadata['frequency'], ],

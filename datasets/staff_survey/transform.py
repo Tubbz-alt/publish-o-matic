@@ -21,9 +21,13 @@ def main(workspace):
             filename = filename_for_resource(resource)
             path = DATA_DIR / filename
 
-            download_file(resource['url'], path)
-            print "Uploading to S3"
-            url = u.upload(path)
+            try:
+                download_file(resource['url'], path)
+                print "Uploading to S3"
+                url = u.upload(path)
+            except:
+                print "Failed to download '{}'".format(url)
+                continue
             resource['url'] = url
 
     u.close()

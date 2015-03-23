@@ -43,7 +43,7 @@ def load_ods():
             name=metadata['name'],
             title=metadata['title'],
             state='active',
-            licence_id='ogl',
+            license_id='uk-ogl',
             notes=metadata['notes'],
             #url=metadata['source'],
             tags=dc.tags(*metadata['tags']),
