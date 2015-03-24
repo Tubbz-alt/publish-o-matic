@@ -24,38 +24,27 @@ def get_local_filename(dataset_dir, url):
 
 def load_ods():
     for directory, metadata_file, metadata in datasets():
-        """
-        resources = [
-            dict(
-                description=r['name'],
-                name=r['url'].split('/')[-1],
-                format=r['url'][-4:].upper(),
-                url=r['url'],
-                #upload=open(get_local_filename(directory, r['url']), 'r')
+        print 'Processing', metadata['title'], metadata['name']
+        try:
+            dc.Dataset.create_or_update(
+                name=metadata['name'],
+                title=metadata['title'],
+                state='active',
+                license_id='uk-ogl',
+                notes=metadata['notes'],
+                origin=metadata['origin'],
+                tags=dc.tags(*metadata['tags']),
+                resources=metadata["resources"],
+                owner_org='hscic',
+                frequency=metadata['frequency'],
+                extras=[
+                    dict(key='coverage_start_date', value=metadata['coverage_start_date']),
+                    dict(key='coverage_end_date', value=metadata['coverage_end_date']),
+                 #   dict(key='publication_date', value=metadata['publication_date'])
+                ]
             )
-            for r in metadata['resources']
-        ]
-        """
-
-        print 'Creating', metadata['title'], metadata['name']
-
-        dc.Dataset.create_or_update(
-            name=metadata['name'],
-            title=metadata['title'],
-            state='active',
-            license_id='uk-ogl',
-            notes=metadata['notes'],
-            origin=metadata['origin'],
-            tags=dc.tags(*metadata['tags']),
-            resources=metadata["resources"],
-            owner_org='hscic',
-            frequency=metadata['frequency'],
-            extras=[
-                dict(key='coverage_start_date', value=metadata['coverage_start_date']),
-                dict(key='coverage_end_date', value=metadata['coverage_end_date']),
-             #   dict(key='publication_date', value=metadata['publication_date'])
-            ]
-        )
+        except:
+            print "Failed to process", metadata['name']
     return
 
 def group_ods():
