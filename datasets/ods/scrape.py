@@ -15,6 +15,7 @@ import slugify
 
 from datasets.ods.info import DATASETS
 from publish.lib.helpers import download_file, to_markdown, remove_tables_from_dom
+from publish.lib.encoding import fix_bad_unicode
 
 PREFIX = "ODS"
 
@@ -76,7 +77,7 @@ def download_and_hash_file(dataset_name, url):
 # Multi-datasets on a single page.... ugh
 ###############################################################################
 def build_dataset(header, desc, table_rows, url):
-    desc_html = to_markdown("\n".join(desc).decode('utf8'))
+    desc_html = to_markdown(fix_bad_unicode(unicode("\n".join(desc).decode('utf8'))))
 
     metadata = {
         "name": "{}-{}".format(PREFIX.lower(), slugify.slugify(header).lower()),
