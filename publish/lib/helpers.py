@@ -43,6 +43,18 @@ def filename_for_resource(resource):
     name = resource['url'].encode('utf8', 'ignore').split('/')[-1]
     return unquote(name)
 
+def create_hash_file(filepath):
+    hash_file = filepath + ".hash"
+
+    h = hashlib.md5()
+    with open(filepath, 'rb') as f:
+        buf = f.read()
+        h.update(buf)
+
+    open(hash_file, "wb").write(h.hexdigest())
+
+    return hash_file
+
 def download_file(url, target_file):
     with requests_cache.disabled():
         size = 0
