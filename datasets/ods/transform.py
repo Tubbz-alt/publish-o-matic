@@ -14,6 +14,7 @@ from publish.lib.unzip import Unzipper
 
 DATA_DIR = None
 
+
 def main(workspace):
     global DATA_DIR
     DATA_DIR = ffs.Path(workspace) / 'data'

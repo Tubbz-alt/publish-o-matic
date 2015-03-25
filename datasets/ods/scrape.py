@@ -18,6 +18,9 @@ from publish.lib.helpers import download_file, to_markdown, remove_tables_from_d
 from publish.lib.encoding import fix_bad_unicode
 
 PREFIX = "ODS"
+MONTHLY_DEFAULT_DESC = """
+Monthly amendments to Organisation Codes data are available to ODS users. These can be used to update the main data files. The amendment files published here provide details of all changes which occurred in the preceding month. To fully update a data file, all of the subsequent monthly update files must be applied.
+"""
 
 title_matcher = re.compile('^(.*)\((.*), .*\)$')
 
@@ -70,7 +73,7 @@ def download_and_hash_file(dataset_name, url):
     folder.mkdir()
 
     hash_of_url = hashlib.sha224(url).hexdigest()
-    print download_file(url, os.path.join(folder, hash_of_url))
+    download_file(url, os.path.join(folder, hash_of_url))
 
 
 ###############################################################################
@@ -78,6 +81,12 @@ def download_and_hash_file(dataset_name, url):
 ###############################################################################
 def build_dataset(header, desc, table_rows, url):
     desc_html = to_markdown(fix_bad_unicode(unicode("\n".join(desc).decode('utf8'))))
+
+    if not desc_html.strip() and 'Monthly Amendments' in header:
+        desc_html = to_markdown(MONTHLY_DEFAULT_DESC)
+        #print desc_html
+        #print header
+        #import sys; sys.exit()
 
     metadata = {
         "name": "{}-{}".format(PREFIX.lower(), slugify.slugify(header).lower()),

@@ -37,6 +37,7 @@ def add_metadata_to_qof_datasets():
         for resource in metadata['sources']:
             resource['format'] = resource['filetype']
             resource['name'] = resource['url'].split('/')[-1]
+            resource['url_type'] = ''
 
             filename = filename_for_resource(resource)
             path = DATA_DIR / filename
