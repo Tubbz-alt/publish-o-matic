@@ -33,11 +33,11 @@ def main():
         cli = "{cmd} {scraper} && {dms} --switch {scraper}"\
             .format(cmd=binary, scraper=scraper, dms=dmswitch)
         hour, minute = get_random_hours_and_minutes()
-        crontime = "{} {} * * * {}".format(minute, hour, cli)
+        crontime = "{} {} */2 * * {}".format(minute, hour, cli)
         print crontime
 
     switch = "{dms} --check 48"\
             .format(dms=dmswitch)
     hour, minute = get_random_hours_and_minutes()
-    crontime = "0 0 0/2 * * {}".format(switch)
+    crontime = "0 0 */2 * * {}".format(switch)
     print crontime
