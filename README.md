@@ -2,11 +2,15 @@
 
 Takes data from places, and puts them into a "Data" "Catalogue"
 
+## Automatic Installation
+
+See the instructions in the https://github.com/nhsengland/iit-infrastructure/tree/master/ansible README.rst file.
+
 ## Manual Installation
 
 1. Set up a virtualenv using your favourite tool for doing so, and activate it.
 
-2. ```git clone git@github.com:nhsengland/publish-o-matic.git```
+2. ```git clone https://github.com/nhsengland/publish-o-matic.git```
 
 3. ```python setup.py install``` # or develop if you insist on it being changeable
 
