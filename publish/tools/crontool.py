@@ -30,7 +30,7 @@ def main():
     binary = get_launch_binary()
     dmswitch = get_dmswitch_binary()
     for scraper in get_scraper_names():
-        cli = "{cmd} {scraper} && {dms} --switch {scraper}"\
+        cli = "{cmd} {scraper}  > /var/log/publishomatic/{scraper}.log && {dms} --switch {scraper}"\
             .format(cmd=binary, scraper=scraper, dms=dmswitch)
         hour, minute = get_random_hours_and_minutes()
         crontime = "{} {} */2 * * {}".format(minute, hour, cli)
