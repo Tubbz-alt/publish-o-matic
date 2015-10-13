@@ -13,7 +13,7 @@ from lxml.html import fromstring, tostring
 import requests
 import slugify
 
-from publish.lib.helpers import to_markdown
+from publish.lib.helpers import to_markdown, hd
 from publish.lib.encoding import fix_bad_unicode
 
 MONTH_DATE_RANGE_RE = re.compile(".*,\s(.*)\sto\s(.*)\s(\d{4}).*")
@@ -76,16 +76,18 @@ def date_range_from_title(title):
 
 def scrape_commissioner_page(link):
     # One of these links is not like the others....
-    if link.get('href') == 'http://www.england.nhs.uk/statistics/2012/03/23/cwt-april-to-december-2011/':
-        # Special case....
-        return None
+    # if link.get('href') == 'http://www.england.nhs.uk/statistics/2012/03/23/cwt-april-to-december-2011/':
+    #     # Special case....
+    #     return None
+
 
     # Find all the li a underneath the .column.center
-    html = requests.get(link.get('href'))
+    html = requests.get(link)
     dom = fromstring(html.content)
 
-    div = dom.cssselect('.column.center')[0]
-    title = div.cssselect('h2')[0].text_content().strip()
+    div = dom.cssselect('.column.center')[0]    
+    title = div.cssselect('h1')[0].text_content().strip()
+
 
     links = div.cssselect('li a')
     if len(links) == 0:
@@ -100,7 +102,8 @@ def scrape_commissioner_page(link):
 
     dataset['title'] = title
     dataset['name'] = slugify.slugify(title).lower()
-    dataset["notes"] = to_markdown( fix_bad_unicode(unicode(tostring(div.cssselect('article p')[0]))) )
+    if len(div.cssselect('article p')) > 0:
+        dataset["notes"] = to_markdown( fix_bad_unicode(unicode(tostring(div.cssselect('article p')[0]))) )
     dataset["tags"] = ["CWT"]
     dataset["resources"] = resources
     dataset["origin"] = link.get('href')
@@ -147,9 +150,27 @@ def scrape(workspace):
     print "Scraping CWT with workspace {}".format(workspace)
 
     datasets = []
+    bases = [
+        'http://www.england.nhs.uk/statistics/statistical-work-areas/cancer-waiting-times/provider-based-cancer-waiting-times-statistics/',
+        'http://www.england.nhs.uk/statistics/statistical-work-areas/cancer-waiting-times/commissioner-based-cancer-waiting-times-statistics/'
+    ]
+    targets = []
+    for base in bases: 
+        html = requests.get(base)
+        page = fromstring(html.content)
+        
+        h3 = hd([h for h in page.cssselect('h3') if h.text_content().strip().lower() == 'latest statistics'])
+        links = [a.get('href') for a in h3.getnext().cssselect('a')]
+        for l in links:
+            print l
+        targets += links
+        
+    for t in targets:
+        datasets.append(scrape_commissioner_page(t))
+    # datasets.extend(commissioner_based())
+    # datasets.extend(default_cwt())
 
-    datasets.extend(commissioner_based())
-    datasets.extend(default_cwt())
+
 
     datasets = filter(lambda x: x is not None, datasets)
     return datasets
