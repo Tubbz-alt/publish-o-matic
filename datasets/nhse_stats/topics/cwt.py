@@ -104,6 +104,8 @@ def scrape_commissioner_page(link):
     dataset['name'] = slugify.slugify(title).lower()
     if len(div.cssselect('article p')) > 0:
         dataset["notes"] = to_markdown( fix_bad_unicode(unicode(tostring(div.cssselect('article p')[0]))) )
+    else: 
+        dataset['notes'] = to_markdown( fix_bad_unicode(unicode(tostring(div.cssselect('p')[0]))) )
     dataset["tags"] = ["CWT"]
     dataset["resources"] = resources
     dataset["origin"] = link.get('href')
