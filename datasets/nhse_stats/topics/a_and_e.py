@@ -122,6 +122,12 @@ def scrape(workspace):
     h3 = hd([h for h in page.cssselect('h3') if h.text_content().strip() == 'Weekly Data and Quarterly Aggregates'])
     links = h3.getnext().cssselect('a')
 
+    h3 = hd([h for h in page.cssselect('h3') if
+             h.text_content().strip() == 'Monthly Data'])
+    links += h3.getnext().cssselect('a')
+    for l in links:
+        print l
+    
     datasets = []
     for l in links:
         try:
