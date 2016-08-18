@@ -12,6 +12,9 @@ import ffs
 
 
 def load_statistic(dataset, directory):
+    if '2015' not in dataset['title']:
+        print 'Skipping', dataset['title'].encode('utf8'), dataset['name'].encode('utf8')
+        return
     print 'Creating', dataset['title'].encode('utf8'), dataset['name'].encode('utf8')
     try:
         extras = []
