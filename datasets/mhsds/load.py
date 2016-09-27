@@ -30,9 +30,13 @@ def load_data(datasets):
             owner_org='hscic',
             coverage_start_date=metadata['coverage_start_date'],
             coverage_end_date=metadata['coverage_end_date'],
-            frequency=metadata['frequency'],
             extras=[
-                dict(key='publication_date', value=metadata['publication_date'])
+                dict(
+                    key='publication_date',
+                    value=metadata['publication_date']
+                ),
+                # note when we move to CKAN 2.5 this should be changed to a kwarg
+                dict(key='frequency', value=metadata['frequency']),
             ]
         )
 

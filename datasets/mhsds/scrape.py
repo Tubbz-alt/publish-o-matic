@@ -4,6 +4,7 @@ import json
 import ffs
 from bs4 import BeautifulSoup
 import requests
+from publish.lib.helpers import to_markdown
 
 
 logging.basicConfig(#filename='datasets.log',
@@ -76,9 +77,9 @@ def parse_to_dataset(parsed_json, month, year):
 
     dataset["coverage_end_date"] = (two_months_time - timedelta(1)).isoformat()
 
-    dataset["notes"] = parsed_json['summary']
+    dataset["notes"] = to_markdown(parsed_json['summary'])
     if 'key_facts' in parsed_json:
-        dataset["notes"] += '\n\n<h2>KEY FACTS:</h2>\n' + ''.join(parsed_json['key_facts'])
+        dataset["notes"] += '\n\nKEY FACTS:\n' + ''.join(parsed_json['key_facts'])
     resources = []
 
     for source in parsed_json["sources"]:
