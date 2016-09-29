@@ -1385,4 +1385,3 @@ def main(workspace):
         if k not in found:
             raise ValueError('{} not found')
     json.dump(ccgois_indicators, open(os.path.join(root,'ccgois_indicators.json'), 'wb'), indent=2)
-

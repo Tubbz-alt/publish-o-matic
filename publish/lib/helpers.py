@@ -1,6 +1,7 @@
 import hashlib
 import html2text
 import os
+import slugify
 import requests
 import requests_cache
 from urllib import unquote
@@ -104,3 +105,7 @@ def to_markdown(text):
     txt = h.handle(fix_bad_unicode(unicode(text.replace(u'\xa0', u' '))))
     h.close()
     return txt
+
+
+def get_name_from_title(title):
+    return slugify.slugify(title).lower()[:100]

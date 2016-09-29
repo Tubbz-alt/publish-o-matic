@@ -53,6 +53,7 @@ setup(
             'ccgois=datasets.ccgois:entrypoints',
             #'hscic=datasets.hscic:entrypoints',
             'ods=datasets.ods:entrypoints',
+            'iapt=datasets.iapt:entrypoints',
             'nhsof=datasets.nhsof:entrypoints',
             'phof=datasets.phof:entrypoints',
             'qof=datasets.qof:entrypoints',

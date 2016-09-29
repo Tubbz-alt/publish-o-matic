@@ -26,7 +26,7 @@ def main(workspace):
 
         try:
             m = importer.find_module(modname).load_module(modname)
-            datasets.extend(m.scrape( DATA_DIR ))
+            datasets.extend(m.scrape(DATA_DIR))
         except Exception, e:
             # Do not fail all scrapers just because one of them failed.
             # Log it, and carry on

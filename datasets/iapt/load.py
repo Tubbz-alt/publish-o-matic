@@ -2,6 +2,9 @@ import ffs
 import dc
 import ffs
 
+GROUP = "iaptr"
+PUBLISHER = "hscic"
+
 
 def load_data(datasets):
     for metadata in datasets:
@@ -15,8 +18,9 @@ def load_data(datasets):
             )
             for r in metadata['resources']
         ]
+
         dc.Dataset.create_or_update(
-            name=metadata["name"],
+            name=metadata['name'],
             title=metadata['title'],
             state='active',
             license_id='uk-ogl',
@@ -24,7 +28,7 @@ def load_data(datasets):
             origin=metadata['source'],
             tags=dc.tags(*metadata['tags']),
             resources=resources,
-            owner_org='hscic',
+            owner_org=PUBLISHER,
             coverage_start_date=metadata['coverage_start_date'],
             coverage_end_date=metadata['coverage_end_date'],
             extras=[
@@ -41,12 +45,12 @@ def group_data(datasets):
     for metadata in datasets:
         dataset = dc.ckan.action.package_show(id=metadata["name"])
 
-        if [g for g in dataset['groups'] if g['name'].lower() == 'mhsds']:
+        if [g for g in dataset['groups'] if g['name'].lower() == GROUP]:
             print 'Already in group', g
 
         else:
             dc.ckan.action.member_create(
-                id='mhsds',
+                id=GROUP,
                 object=dataset['name'],
                 object_type='package',
                 capacity='member'
@@ -54,11 +58,11 @@ def group_data(datasets):
 
 
 def main(workspace):
-    dataset_file = ffs.Path(workspace) / 'data/mhsds/dataset.metadata.json'
+    dataset_file = ffs.Path(workspace) / 'data/iapt/dataset.metadata.json'
 
     datasets = dataset_file.json_load()
     load_data(datasets)
     group_data(datasets)
-    dc.ensure_publisher('hscic')
-    dc.ensure_group('mhsds')
+    dc.ensure_publisher(PUBLISHER)
+    dc.ensure_group(GROUP)
     return 0

@@ -40,7 +40,6 @@ def main(workspace):
             resource['url'] = url
             resource['url_type'] = ''  # make sure we zap historical uploads
 
-    u.close()
     json.dump(datasets, open(os.path.join(DATA_DIR, "metadata.json"), 'wb'))
 
     return 0
