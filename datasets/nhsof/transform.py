@@ -49,9 +49,6 @@ def add_metadata_to_qof_datasets():
             resources.append(resource)
         metadata['resources'] = resources
 
-
-    u.close()
-
     json.dump(datasets, open(os.path.join(DATA_DIR, "nhsof_metadata_indicators.json"), "w"))
     return
 
@@ -61,11 +58,3 @@ def main(workspace):
 
     add_metadata_to_qof_datasets()
     return 0
-
-
-
-
-
-
-
-

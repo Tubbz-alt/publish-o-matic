@@ -29,6 +29,5 @@ def main(workspace):
             resource['url'] = url
             resources.append(resource)
         dataset['resources'] = resources
-    u.close()
 
     json.dump(datasets, open(DATA_DIR / 'ccgois_indicators.json', 'w'))

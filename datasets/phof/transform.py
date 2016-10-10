@@ -48,8 +48,6 @@ def add_metadata_to_ascof_datasets():
         print "Uploading to S3"
         url = u.upload(path)
         resource['url'] = url
-    u.close()
-
 
     metadata_file.truncate()
     metadata_file << json.dumps(metadata, indent=2)
@@ -63,10 +61,3 @@ def main(workspace):
 
 if __name__ == '__main__':
     sys.exit(main(ffs.Path.here()))
-
-
-
-
-
-
-

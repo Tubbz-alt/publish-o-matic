@@ -102,8 +102,6 @@ def retrieve_qof_datasets(datasets):
             resource['url'] = url
         results.append(dataset)
 
-    u.close()
-
     metadata_file = DATA_DIR/'dataset.metadata.json'
     if metadata_file:
         metadata_file.truncate()
@@ -117,4 +115,3 @@ def main(workspace):
     datasets = find_qof_datasets()
     retrieve_qof_datasets(datasets)
     return 0
-

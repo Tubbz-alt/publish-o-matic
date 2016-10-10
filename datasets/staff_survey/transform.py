@@ -30,7 +30,6 @@ def main(workspace):
                 continue
             resource['url'] = url
 
-    u.close()
     json.dump(datasets, open(os.path.join(DATA_DIR, "metadata.json"), 'wb'))
 
     return 0

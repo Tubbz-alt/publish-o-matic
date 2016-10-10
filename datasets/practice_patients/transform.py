@@ -43,7 +43,6 @@ def add_metadata_to_pp_datasets():
             resource['url'] = url
             print resource['url']
             resource['name'] = resource['url'].split('/')[-1]
-        u.close()
 
         metadata_file.truncate()
         metadata_file << json.dumps(metadata, indent=2)
@@ -54,4 +53,3 @@ def main(workspace):
     DATA_DIR = ffs.Path(workspace) / 'data'
     add_metadata_to_pp_datasets()
     return 0
-

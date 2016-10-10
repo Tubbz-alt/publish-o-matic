@@ -14,35 +14,24 @@ During upload, the following steps are taken, given the filename abc
 4. Return the URL of the newly created file
 """
 import ConfigParser
-import hashlib
-import mimetypes
-import os
-
-import boto.s3.key as s3key
-import boto.s3.connection as s3connection
+import boto3
 import ffs
 import requests
 
-class Uploader(object):
 
-    def __init__(self, scraper_name):
-        self.scraper_name = scraper_name
+class Uploader(object):
+    def __init__(self, owner):
+        self.owner = owner
 
         c = ConfigParser.ConfigParser()
         c.read(ffs.Path('~/.dc.ini').abspath)
 
         self.bucket_name = c.get('ckan', 'aws_bucket')
-        self.conn = s3connection.S3Connection(c.get('ckan', 'aws_access_key'),
-                                              c.get('ckan', 'aws_secret_key'))
-        self.bucket = self.conn.get_bucket(self.bucket_name)
-
-
-    def close(self):
-        self.conn.close()
+        self.conn = boto3.resource('s3')
 
     def build_bucket_path(self, local_file):
         filename = local_file.split('/')[-1]
-        return "{}/{}".format(self.scraper_name, filename)
+        return "{}/{}".format(self.owner, filename)
 
     def get_local_hash(self, local_file):
         try:
@@ -53,8 +42,7 @@ class Uploader(object):
 
     def get_remote_hash(self, local_file):
         """ Gets the remote hash for a file, or None """
-        url = "https://{}.s3.amazonaws.com/{}".format(self.bucket_name,
-                                                       self.build_bucket_path(local_file))
+        url = self.get_s3_url(local_file)
         h = requests.head(url)
         etag = h.headers.get('etag')
         if not etag:
@@ -64,31 +52,22 @@ class Uploader(object):
 
     def write_file_to_bucket(self, local_file):
         path = self.build_bucket_path(local_file)
-        print "Writing file", path
-        k = s3key.Key(self.bucket)
-        k.key = path
-        k.set_contents_from_filename(str(local_file))
-        k.set_acl('public-read')
+        obj = self.conn.Object(self.bucket_name, path)
+        with open(local_file, 'rb') as f:
+            obj.put(Body=f)
+        obj.Acl().put(ACL='public-read')
+        return obj
 
+    def get_s3_url(self, local_file):
+        return "https://{}.s3.amazonaws.com/{}".format(
+            self.bucket_name, self.build_bucket_path(local_file)
+        )
 
     def upload(self, local_file):
         """ Returns the new URL of the uploaded file """
         local_hash = self.get_local_hash(local_file)
         remote_hash = self.get_remote_hash(local_file)
-        print local_hash, remote_hash
         if not remote_hash or not local_hash == remote_hash:
-            print "Remote_hash is :", remote_hash
-            print "Local hash is : ", local_hash
             self.write_file_to_bucket(local_file)
-            remote_hash = local_hash
 
-        return "https://{}.s3.amazonaws.com/{}".format(self.bucket_name,
-                                                       self.build_bucket_path(local_file))
-
-
-if __name__ == "__main__":
-    from publish.lib.helpers import download_file
-
-    u = Uploader("ods")
-    print u.upload("/tmp/ods/data/12345.xls")
-    u.close()
+        return self.get_s3_url(local_file)

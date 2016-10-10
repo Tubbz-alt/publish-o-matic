@@ -84,7 +84,6 @@ def main(workspace):
             except:
                 print '***' * 30
                 print "Failed to download: ", resource['url']
-        u.close()
 
         # Add a nice tag so we can find them all again
         dataset['tags'].append({'name': 'HQIP' })
@@ -118,5 +117,3 @@ def main(workspace):
         except ValidationError:
             raise
             print "Failed to upload {}".format(dataset['name'])
-
-

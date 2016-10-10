@@ -45,7 +45,5 @@ def main(workspace):
             print '*' * 30
             unzipper.unzip(dataset)
             print '*' * 30
-    u.close()
 
     json.dump(datasets, open(metadata_file, 'w'))
-

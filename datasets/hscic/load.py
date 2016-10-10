@@ -123,7 +123,6 @@ def publish_indicators(start_from=0):
             traceback.print_exc()
             import sys; sys.exit(1)
 
-    u.close()
     return
 
 def publish_datasets(start_from=0):
@@ -231,8 +230,8 @@ def publish_datasets(start_from=0):
             import traceback
             traceback.print_exc()
 
-    u.close()
     return
+
 
 def load(workspace):
     global DATA_DIR

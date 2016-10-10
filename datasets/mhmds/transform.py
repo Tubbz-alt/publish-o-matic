@@ -34,7 +34,6 @@ def add_metadata_to_datasets():
             url = u.upload(path)
             resource['url'] = url
             print resource['url']
-        u.close()
 
         metadata_file.truncate()
         metadata_file << json.dumps(metadata, indent=2)
@@ -48,10 +47,3 @@ def main(workspace):
 
 if __name__ == '__main__':
     sys.exit(main(ffs.Path.here()))
-
-
-
-
-
-
-

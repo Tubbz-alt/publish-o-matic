@@ -1,4 +1,7 @@
 beautifulsoup4
+boto3==1.4.0
+boto==2.36.0
+botocore==1.4.56
 requests
 -e git://github.com/davidmiller/ffs#egg=ffs
 -e git://github.com/davidmiller/dc#egg=dc
