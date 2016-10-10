@@ -2,7 +2,7 @@ import ffs
 import dc
 import ffs
 
-GROUP = "iaptr"
+GROUP = "iapt"
 PUBLISHER = "hscic"
 
 

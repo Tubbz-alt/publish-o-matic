@@ -29,13 +29,13 @@ See the instructions in the https://github.com/nhsengland/iit-infrastructure/tre
 I don't trust it yet ...
 
 ```
-$ crontool > mycrontab 
+$ crontool > mycrontab
 
-$ less mycrontab 
+$ less mycrontab
 
-** does it look sane? ** 
+** does it look sane? **
 
-$ crontab mycrontab 
+$ crontab mycrontab
 
 ```
 
@@ -57,6 +57,3 @@ Each directory is expected to contain a data dir (For cached/retrieved data file
 * scrape.py - scrape the data files and metadata
 * transform.py - make adjustments / additions to scraped metadata as required
 * load.py - load the datasets into a CKAN instance.
-
-
-
