@@ -53,7 +53,6 @@ class Uploader(object):
 
     def write_file_to_bucket(self, local_file):
         path = self.build_bucket_path(local_file)
-        print "Writing file", path
         obj = self.conn.Object(self.bucket_name, path)
         with open(local_file, 'rb') as f:
             obj.put(Body=f)
@@ -73,10 +72,3 @@ class Uploader(object):
             self.write_file_to_bucket(local_file)
 
         return self.get_s3_url(local_file)
-
-
-if __name__ == "__main__":
-    from publish.lib.helpers import download_file
-
-    u = Uploader("ods")
-    print u.upload("/tmp/ods/data/12345.xls")
