@@ -35,10 +35,4 @@ def main(workspace):
             valid_search_result,
         ))
 
-    DATA_DIR = ffs.Path(workspace) / 'data'
-    dataset_dir = DATA_DIR/'iapt'
-    dataset_dir.mkdir()
-    metadata_file = dataset_dir/'dataset.metadata.json'
-    if metadata_file:
-        metadata_file.truncate()
-    metadata_file << json.dumps(dataset, indent=2)
+    digital_nhs_helpers.store_results_to_file(workspace, "iapt", dataset)

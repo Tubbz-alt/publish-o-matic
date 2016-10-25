@@ -6,6 +6,10 @@ Takes data from places, and puts them into a "Data" "Catalogue"
 
 See the instructions in the https://github.com/nhsengland/iit-infrastructure/tree/master/ansible README.rst file.
 
+## add your credentials to a ~/.dc.ini file
+An example of the expected ini file format can be found
+https://github.com/nhsengland/iit-infrastructure/blob/master/ansible/config/dc.ini
+
 ## Manual Installation
 
 1. Set up a virtualenv using your favourite tool for doing so, and activate it.

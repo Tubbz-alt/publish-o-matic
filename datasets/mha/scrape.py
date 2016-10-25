@@ -38,11 +38,5 @@ def get_data_set():
 
 
 def main(workspace):
-    DATA_DIR = ffs.Path(workspace) / 'data'
-    dataset_dir = DATA_DIR/'mha'
-    dataset_dir.mkdir()
-    metadata_file = dataset_dir/'dataset.metadata.json'
-    if metadata_file:
-        metadata_file.truncate()
     dataset = get_data_set()
-    metadata_file << json.dumps(dataset, indent=2)
+    digital_nhs_helpers.store_results_to_file(workspace, "mha", dataset)

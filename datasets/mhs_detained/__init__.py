@@ -5,24 +5,24 @@ from publish.lib import digital_nhs_helpers
 
 def entrypoints():
     """
-        scrapes and saves the MH annual bulletin, e.g.
-        http://content.digital.nhs.uk/article/2021/Website-Search?productid=19123&q=Mental+Health+Bulletin%2c+Annual+Report&sort=Relevance&size=10&page=1&area=both#top
+        scrapes the annual figures for the number of people
+        detained under the mental health act
 
-        and stores in the mhsds group
+        e.g. http://content.digital.nhs.uk/catalogue/PUB18803
     """
 
     # creates a function that uploads to S3 with this scraper
     transform = partial(
         digital_nhs_helpers.upload_resource_from_file,
-        "mha" # scraper name
+        "mhs_detained"  # scraper name
     )
 
     # creates a function that uploads to S3 with this scraper, publisher, and group
     load = partial(
         digital_nhs_helpers.load_dataset_to_ckan,
-        "mha",  # scraper name
+        "mhs_detained",  # scraper name
         "hscic",  # publisher
-        "mhsds"  # group
+        "mhs-detained"  # group
     )
     return {
         'scrape': main_scrape,
