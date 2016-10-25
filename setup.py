@@ -54,6 +54,7 @@ setup(
             #'hscic=datasets.hscic:entrypoints',
             'ods=datasets.ods:entrypoints',
             'iapt=datasets.iapt:entrypoints',
+            'mha=datasets.mha:entrypoints',
             'nhsof=datasets.nhsof:entrypoints',
             'phof=datasets.phof:entrypoints',
             'qof=datasets.qof:entrypoints',
