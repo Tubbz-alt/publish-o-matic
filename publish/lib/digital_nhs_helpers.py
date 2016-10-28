@@ -114,7 +114,7 @@ def upload_resource_from_file(scraper_name, workspace, uploader='hscic'):
     dataset_file << json.dumps(datasets, indent=2)
 
 
-def _load_data(datasets):
+def _load_data(datasets, publisher):
     for metadata in datasets:
         resources = [
             dict(
@@ -134,7 +134,7 @@ def _load_data(datasets):
             origin=metadata['source'],
             tags=dc.tags(*metadata['tags']),
             resources=resources,
-            owner_org='hscic',
+            owner_org=publisher,
             coverage_start_date=metadata['coverage_start_date'],
             coverage_end_date=metadata['coverage_end_date'],
             extras=[
@@ -173,7 +173,7 @@ def load_dataset_to_ckan(scraper_name, publisher, group, workspace):
     relative_json_file = 'data/{}/dataset.metadata.json'.format(scraper_name)
     dataset_file = ffs.Path(workspace) / relative_json_file
     datasets = dataset_file.json_load()
-    _load_data(datasets)
+    _load_data(datasets, publisher)
     _group_data(datasets, group)
     dc.ensure_publisher(publisher)
     dc.ensure_group(group)
