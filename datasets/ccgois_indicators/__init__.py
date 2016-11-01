@@ -1,19 +1,16 @@
 from scrape import main as main_scrape
 from functools import partial
 from publish.lib import digital_nhs_helpers
+from datasets.ccgois_indicators.scrape import SCRAPER_NAME
 
-SCRAPER_NAME = "indicators"
 GROUP = "ccgois"
 PUBLISHER = "hscic"
 
 
 def entrypoints():
     """
-        scrapes and saves the MH annual bulletin, e.g.
-        scrapes the Improving Access to Psychological Therapies Report, e.g.
-        http://content.digital.nhs.uk/catalogue/PUB21229
-
-        and stores in the iapt group
+        scrapes the CCG Outcomes Indicator Set from
+        https://indicators.hscic.gov.uk/webview/
     """
 
     # creates a function that uploads to S3 with this scraper

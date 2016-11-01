@@ -61,7 +61,7 @@ setup(
             'qof=datasets.qof:entrypoints',
             'mhmds=datasets.mhmds:entrypoints',
             'mhsds=datasets.mhsds:entrypoints',
-            'indicators=datasets.indicators:entrypoints',
+            'ccgois_indicators=datasets.ccgois_indicators:entrypoints',
             'nhse_stats=datasets.nhse_stats:entrypoints',
             'patient_survey=datasets.patient_survey:entrypoints',
             'practice_patients=datasets.practice_patients:entrypoints',

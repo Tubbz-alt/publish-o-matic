@@ -1,85 +1,92 @@
-import re
-import requests
+"""
+ helpers to scrape from the https://indicators.hscic.gov.uk/webview/ site
+"""
 import datetime
+import requests
+import re
+
 from bs4 import BeautifulSoup
+
 from publish.lib.helpers import get_name_from_title
-from publish.lib import digital_nhs_helpers
 
-# so the wonderful https://indicators.hscic.gov.uk/webview/
-# is not going to make our life easy
-# not only is it a lot of iframes but even the navigation steps
-# are loaded in dynamically
-# therefore we'll hit the top level of their navigation tree
-# then all the bits underneath until we create our own tree
-# then go after what we want...
-
-# the top level tree is split into different domains
-
-# the top level nav tree url
 INDICATORS_ROOT = "https://indicators.hscic.gov.uk"
 NAV_TREE_URL_STRUCTURE = "{}/webview/velocity?v=2&mode=tree&submode=catalog"
 NAV_TREE_URL = NAV_TREE_URL_STRUCTURE.format(INDICATORS_ROOT)
-
 NAV_TREE_URL_BEGINNING = "openRootCatalogWithoutCatalogComment(this, '"
 NAV_TREE_URL_END = "', false);"
-SCRAPER_NAME = "indicators"
-
 
 
 def make_absolute(relative_path):
     return "{0}{1}".format(INDICATORS_ROOT, relative_path)
 
 
-def get_ccg_navigation():
-    """ we only care about the ccg information, ignore the rest
+def extract_link(some_anchor):
+    """ this site just puts the links in raw js in the on click event
+        strip them out
     """
+    js_link = some_anchor.attrs["onclick"]
+    index = js_link.index("/webview")
+    js_link = js_link[index:]
+    js_link = js_link.replace(NAV_TREE_URL_END, "")
+    return make_absolute(js_link)
+
+
+def get_link(some_url):
+    return BeautifulSoup(requests.get(some_url).text)
+
+
+def get_leaf_node(parent_node, already_seen):
+    results = []
+    links = parent_node.find_all("a", class_="nodetext")
+
+    for link in links:
+        if "href" in link.attrs:
+            results.append(make_absolute(link.attrs["href"]))
+            break
+        else:
+            url = extract_link(link)
+            sub_nav = get_link(url)
+            sub_nav.findNext("div", class_="nextlevel")
+            results.extend(get_leaf_node(sub_nav, already_seen))
+
+    return results
+
+
+def get_navigation(title):
     nav_tree = BeautifulSoup(requests.get(NAV_TREE_URL).text)
-    ccg_outcomes_set = nav_tree.find("a", title="CCG Outcomes Indicator Set")
-    return ccg_outcomes_set.findNext("div").find("ul")
-
-
-def get_subnavigation_for_domain():
-    """ iterates over the nodes just under the ccg navigation set
-        (at present thats Domain 1 -5) and returns their links
-    """
-    all_links = get_ccg_navigation().find_all("a", class_="nodetext")
-    # at the moment we only care about the ccg links which begin with 'Domain'
-    sub_tree_urls = []
-
-    for link in all_links:
-        click = link.attrs["onclick"]
-        i = click.replace(NAV_TREE_URL_BEGINNING, "")
-        i = i.replace(NAV_TREE_URL_END, "")
-        sub_tree_urls.append(make_absolute(i))
-
-    return sub_tree_urls
-
-
-def get_ccg_articles():
-    """ iterate through everything in the ccg domain set
-        and return all links to the individual articles
-    """
-    result = []
-    for link in get_subnavigation_for_domain():
-        soup = BeautifulSoup(requests.get(link).text)
-        leaf_links = soup.find_all("a", class_="nodetext")
-        for leaf_link in leaf_links:
-            result.append(make_absolute(leaf_link.attrs["href"]))
-    return result
+    nav_tree = nav_tree.find(class_="browsetree").find(class_="browsetree")
+    nav_link = extract_link(nav_tree.find("a", title=title))
+    return get_leaf_node(get_link(nav_link), {nav_link})
 
 
 def get_publication_date(unparsed):
     dt = datetime.datetime.strptime(unparsed, "%b-%y")
     return dt.strftime("%Y-%m-%d")
 
-def process_ccg_articles(article_link):
+
+def extract_indicators(title):
+    links = get_navigation(title)
+    results = []
+
+    links = links[:1]
+    for link in links:
+        results.append(process_article(link))
+
+    return [r for r in results if r]
+
+
+def process_article(article_link):
     """ take in an article and translate it into something
         we can upload to ckan
 
         example article link
         https://indicators.hscic.gov.uk/webview/velocity;jsessionid=17FEDE2398D364B309E50A29824595F6?v=2&mode=documentation&submode=ddi&study=http%3A%2F%2F192.168.229.23%3A80%2Fobj%2FfStudy%2FP01877
     """
-    article = BeautifulSoup(requests.get(article_link).text)
+    article = get_link(article_link)
+    if not article.find(id="toptitle").text.lstrip().startswith("Dataset:"):
+        # all pages have dataset: in them apart from pages we don't want like
+        # https://indicators.hscic.gov.uk/webview/velocity;jsessionid=887A142248AC0B0B22B4D1FBE83C9795?mode=documentation&submode=catalog&catalog=http%3A%2F%2F192.168.229.23%3A80%2Fobj%2FfCatalog%2FCatalog329
+        return
     title = article.find(text=re.compile("Title"))
     title = title.findNext(class_="ddicontent").text.strip()
 
@@ -121,16 +128,4 @@ def process_ccg_articles(article_link):
         frequency='Quarterly',
         coverage_start_date=None,
         coverage_end_date=None,
-    )
-
-
-def main(workspace):
-    articles = get_ccg_articles()
-    result = []
-    for article in articles:
-        result.append(process_ccg_articles(article))
-    digital_nhs_helpers.store_results_to_file(
-        workspace,
-        SCRAPER_NAME,
-        result
     )
