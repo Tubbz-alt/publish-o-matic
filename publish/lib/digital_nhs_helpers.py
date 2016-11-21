@@ -114,8 +114,9 @@ def upload_resource_from_file(scraper_name, workspace, uploader='hscic'):
     dataset_file << json.dumps(datasets, indent=2)
 
 
-def _load_data(datasets, publisher):
+def _load_data(datasets, publisher, extra_tags):
     for metadata in datasets:
+        tags = metadata['tags'] + extra_tags
         resources = [
             dict(
                 description=r['description'],
@@ -132,7 +133,7 @@ def _load_data(datasets, publisher):
             license_id='uk-ogl',
             notes=metadata['notes'],
             origin=metadata['source'],
-            tags=dc.tags(*metadata['tags']),
+            tags=dc.tags(*tags),
             resources=resources,
             owner_org=publisher,
             coverage_start_date=metadata['coverage_start_date'],
@@ -164,16 +165,18 @@ def _group_data(datasets, group):
             )
 
 
-def load_dataset_to_ckan(scraper_name, publisher, group, workspace):
+def load_dataset_to_ckan(scraper_name, publisher, group, workspace, extra_tags=None):
     """
         assumes that we've got a dataset taken from store_results_to_file
         in the format produced by parse_to_dataset, it will iterate
         over that list from that file and saves them as datasets to ckan
     """
+    if not extra_tags:
+        extra_tags = []
     relative_json_file = 'data/{}/dataset.metadata.json'.format(scraper_name)
     dataset_file = ffs.Path(workspace) / relative_json_file
     datasets = dataset_file.json_load()
-    _load_data(datasets, publisher)
+    _load_data(datasets, publisher, extra_tags)
     _group_data(datasets, group)
     dc.ensure_publisher(publisher)
     dc.ensure_group(group)

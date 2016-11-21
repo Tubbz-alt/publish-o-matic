@@ -3,8 +3,9 @@ from functools import partial
 from publish.lib import digital_nhs_helpers
 
 SCRAPER_NAME = "iapt"
-GROUP = "iapt"
+GROUP = "mental-health-dashboard"
 PUBLISHER = "hscic"
+EXTRA_TAGS = ["Mental Health"]
 
 
 def entrypoints():
@@ -27,7 +28,8 @@ def entrypoints():
         digital_nhs_helpers.load_dataset_to_ckan,
         SCRAPER_NAME,  # scraper name
         PUBLISHER,  # publisher
-        GROUP  # group
+        GROUP,  # group
+        extra_tags=EXTRA_TAGS
     )
     return {
         'scrape': main_scrape,

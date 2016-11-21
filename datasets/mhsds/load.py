@@ -5,6 +5,8 @@ import ffs
 
 def load_data(datasets):
     for metadata in datasets:
+        tags = metadata['tags']
+        tags.append('Mental Health')
         resources = [
             dict(
                 description=r['description'],
@@ -22,7 +24,7 @@ def load_data(datasets):
             license_id='uk-ogl',
             notes=metadata['notes'],
             origin=metadata['source'],
-            tags=dc.tags(*metadata['tags']),
+            tags=dc.tags(*tags),
             resources=resources,
             owner_org='hscic',
             coverage_start_date=metadata['coverage_start_date'],
@@ -60,5 +62,5 @@ def main(workspace):
     load_data(datasets)
     group_data(datasets)
     dc.ensure_publisher('hscic')
-    dc.ensure_group('mhsds')
+    dc.ensure_group("mental-health-dashboard")
     return 0

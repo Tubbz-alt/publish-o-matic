@@ -2,6 +2,8 @@ from scrape import main as main_scrape
 from functools import partial
 from publish.lib import digital_nhs_helpers
 
+GROUP = "mental-health-dashboard"
+EXTRA_TAGS = ["Mental Health"]
 
 def entrypoints():
     """
@@ -22,7 +24,8 @@ def entrypoints():
         digital_nhs_helpers.load_dataset_to_ckan,
         "mhs_detained",  # scraper name
         "hscic",  # publisher
-        "mhs-detained"  # group
+        GROUP,  # group
+        extra_tags=EXTRA_TAGS
     )
     return {
         'scrape': main_scrape,
