@@ -58,6 +58,7 @@ setup(
             'mhs_detained=datasets.mhs_detained:entrypoints',
             'nhsof=datasets.nhsof:entrypoints',
             'phof=datasets.phof:entrypoints',
+            'ons=datasets.ons:entrypoints',
             'qof=datasets.qof:entrypoints',
             'mhmds=datasets.mhmds:entrypoints',
             'mhsds=datasets.mhsds:entrypoints',

@@ -79,13 +79,17 @@ def parse_to_dataset(parsed_json, **kwargs):
     return dataset
 
 
-def store_results_to_file(workspace, scraper_name, dataset):
-    """ Take a datset and store it as a json structure in a file
-    """
+def get_temp_file(workspace, scraper_name):
     data_dir = ffs.Path(workspace) / 'data'
     dataset_dir = data_dir/scraper_name
     dataset_dir.mkdir()
-    metadata_file = dataset_dir/'dataset.metadata.json'
+    return dataset_dir/'dataset.metadata.json'
+
+
+def store_results_to_file(workspace, scraper_name, dataset):
+    """ Take a datset and store it as a json structure in a file
+    """
+    metadata_file = get_temp_file(workspace, scraper_name)
     if metadata_file:
         metadata_file.truncate()
     metadata_file << json.dumps(dataset, indent=2)
@@ -98,9 +102,8 @@ def upload_resource_from_file(scraper_name, workspace, uploader='hscic'):
         over that list from that file and save all resources to S3
     """
     workspace_path = ffs.Path(workspace)
-    relative_json_file = 'data/{}/dataset.metadata.json'.format(scraper_name)
     relative_json_dir = 'data/{}/'.format(scraper_name)
-    dataset_file = workspace_path / relative_json_file
+    dataset_file = get_temp_file(workspace, scraper_name)
     directory = workspace_path / relative_json_dir
     datasets = dataset_file.json_load()
     u = Uploader(uploader)
@@ -173,8 +176,7 @@ def load_dataset_to_ckan(scraper_name, publisher, group, workspace, extra_tags=N
     """
     if not extra_tags:
         extra_tags = []
-    relative_json_file = 'data/{}/dataset.metadata.json'.format(scraper_name)
-    dataset_file = ffs.Path(workspace) / relative_json_file
+    dataset_file = get_temp_file(workspace, scraper_name)
     datasets = dataset_file.json_load()
     _load_data(datasets, publisher, extra_tags)
     _group_data(datasets, group)
