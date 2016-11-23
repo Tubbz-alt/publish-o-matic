@@ -6,6 +6,7 @@ import calendar
 import datetime
 import re
 
+from bs4 import BeautifulSoup
 
 from lxml.html import fromstring, tostring
 import requests
@@ -19,6 +20,7 @@ ROOT = "http://www.england.nhs.uk/statistics/statistical-work-areas/rtt-waiting-
 
 DATE_RE = re.compile("(.*)\s(\d{4})")
 MONTHS_LOOKUP = dict((v,k) for k,v in enumerate(calendar.month_name))
+
 
 def anchor_to_resource(resource):
     href = resource.get('href')
@@ -71,36 +73,33 @@ def create_dataset(title, description, links):
 
     return dataset
 
+def get_description(soup):
+    details = soup.find("article").find_all("ul")
+    description = []
+    for detail in details:
+        list_items = [i.get_text() for i in detail.find_all('li')]
+        description.extend(list_items)
+    return to_markdown("\n".join(description))
 
 def process_link(link):
     datasets = []
 
     href = link.get('href')
-    if not href.startswith('http://www.england.nhs.uk'):
+    if not href.startswith('https://www.england.nhs.uk'):
         return [None]
 
     print "Processing sub-page: {}".format(href)
     html = requests.get(href)
+    soup = BeautifulSoup(html.content)
     page = fromstring(html.content)
 
     # description is from the ul to the first hr.
     description = []
-    elem = page.cssselect('.column.center')
+    elem = page.cssselect('.page-content')
     read = False
     hr_count = 0
-    for e in elem[0]:
-        if e.tag == 'ul':
-            read = True
 
-        if e.tag == 'hr':
-            hr_count += 1
-            if hr_count == 2:
-                read = False
-
-        if read:
-            description.append( tostring(e) )
-    description = to_markdown('\n'.join(description))
-
+    description = get_description(soup)
 
     for h in page.cssselect('h3'):
         # Read all elements from h down to next hr
@@ -135,7 +134,4 @@ def scrape(workspace):
     datasets = filter(lambda x: x is not None, datasets)
 
     # Create a dataset per year from the datasets we were given.
-
-
     return datasets
-
