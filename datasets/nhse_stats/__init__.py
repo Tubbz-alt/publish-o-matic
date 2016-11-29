@@ -10,4 +10,3 @@ def entrypoints():
         'transform': main_transform,
         'load': main_load
     }
-

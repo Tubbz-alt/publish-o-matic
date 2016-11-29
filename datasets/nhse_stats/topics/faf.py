@@ -4,181 +4,197 @@ http://www.england.nhs.uk/statistics/statistical-work-areas/friends-and-family-t
 """
 import calendar
 import datetime
-import re
-
-
-from lxml.html import fromstring, tostring
-import requests
 import slugify
+from collections import defaultdict
+
+
+import requests
+from bs4 import BeautifulSoup
 
 from publish.lib.helpers import to_markdown
 from publish.lib.encoding import fix_bad_unicode
 
 
 TITLE_ROOT = "Friends and Family Test"
-ROOT = "http://www.england.nhs.uk/statistics/statistical-work-areas/friends-and-family-test/friends-and-family-test-data/"
 
-YEARS_RE = re.compile("(\d{4}-\d{2})")
-DATE_RE = re.compile(".*\s(.*)\s(\d{4})")
-MONTHS_LOOKUP = dict((v,k) for k,v in enumerate(calendar.month_name))
 
-def anchor_to_resource(resource):
-    href = resource.get('href')
-    return {
-        "description": resource.text_content().encode('utf8'),
-        "name": href.split('/')[-1],
-        "url": href,
-        "format": href[href.rfind(".")+1:].upper(),
-    }
-
-def process_block(p, title, description, current_year):
-    if not current_year:
-        return None
-
-    dataset = {
-        "title": "{} - {} - {}".format(TITLE_ROOT, title, current_year),
-        "notes": description,
-        "tags": ["Friends and Family", "Statistics", current_year, title.replace('&',' and ')],
-        "resources": [],
-        "origin": "http://www.england.nhs.uk/statistics/statistical-work-areas/friends-and-family-test",
-        "groups": ['faf']
-    }
-
-    for resource in p.cssselect('a'):
-        dataset["resources"].append(anchor_to_resource(resource))
-
-    dataset["name"] = slugify.slugify(dataset['title']).lower()
-
-    return dataset
-
-def contains_year(element):
-    m = YEARS_RE.match(element.text_content().strip())
-    if m:
-        return m.groups()[0]
-    return None
-
-def process_latest(datasets, latest):
+DESCRIPTION = [
     """
-    We process the latest data as a special case because it is
-    all munged together in a separate block.  We need to find the
-    links, parse them, try and group them by name, and then decide
-    how we're going to label the dataset.
+        The Friends and Family Test (FFT) is an important feedback tool that
+        supports the fundamental principle that people who use NHS services
+        should have the opportunity to provide feedback on their experience.
+    """,
     """
-    for anchor in latest:
-        resource = anchor_to_resource(anchor)
-        finder = resource['description'].split(' ')[1]
+        It asks people if they would recommend the services they have used and
+        offers a range of responses. When combined with supplementary follow-up
+        questions, the FFT provides a mechanism to highlight both good and poor
+         patient experience. This kind of feedback is vital in transforming NHS
+         services and supporting patient choice.
+    """,
+    """
+        Since it was initially launched in April 2013, the FFT has been rolled
+        out in phases to most NHS-funded services in England, giving all
+        patients the opportunity to leave feedback on their care and treatment.
+    """,
+    """
+        The FFT has produced around 25 million pieces of feedback so far- and
+        the total rises by over a million a month - making it the biggest
+        source of patient opinion in the world. Scores so far have told us
+        that at least nine out of ten patients would recommend the services
+        they used to their loved ones. Patient comments also identify areas
+        where improvements can be made so that providers can make care and
+        treatment better for everyone.
+    """
+]
 
-        finder = "{} - {} -".format(TITLE_ROOT, finder)
+FRIENDS_AND_FAMILTY_TEST_TYPES = [
+    "FFT A&E",
+    "FFT Ambulance (including PTS)",
+    "FFT Community",
+    "FFT Dental",
+    "FFT GP",
+    "FFT Inpatient",
+    "FFT Maternity",
+    "FFT Mental Health",
+    "FFT Outpatient",
+]
 
-        # We can find the first dataset in the list (datasets) whose
-        # title starts with finder as the most recent years go at
-        # the top of the list on the page.
-        for dataset in datasets:
-            if dataset['title'].startswith(finder):
-                print "We think ", resource['description'], "goes in", dataset['title']
-                dataset['resources'].insert(0, resource)
-                break
 
-def string_to_date(s, start=True):
+HISTORIC_DATA = 'https://www.england.nhs.uk/ourwork/pe/fft/friends-and-family-test-data/fft-data-historic'
+CURRENT_DATA = "https://www.england.nhs.uk/ourwork/pe/fft/friends-and-family-test-data/"
 
-    m = DATE_RE.match(s)
-    if not m:
-        return ""
 
-    if not len(m.groups()) == 2:
-        return ""
+def get_soup(url):
+    return BeautifulSoup(requests.get(url).content)
 
-    mnth = MONTHS_LOOKUP.get(m.groups()[0].strip(), "")
-    year = int(m.groups()[1].strip())
 
-    if not mnth:
-        return ""
+class Resource(object):
+    def get_month(self, some_date_str):
+        for month in calendar.month_name:
+            if month and month.lower() in some_date_str.lower():
+                return month
 
-    day = 1
-    _, mend = calendar.monthrange(year, mnth)
-    if not start:
-        day = mend
+    def get_year(self, some_date_str):
+        for year in xrange(2010, 2030):
+            # note the space
+            lookup_year = " {}".format(year)
+            if lookup_year in some_date_str:
+                return year
 
-    d = datetime.datetime(year=year, month=mnth, day=day)
-    return d.strftime("%Y-%m-%d")
+    def __init__(self, friends_and_family_type, anchor):
+        self.friends_and_family_type = friends_and_family_type
+        self.url = anchor.attrs["href"]
+        # horrific unicode mangling work
+        link_title = anchor.get_text().encode('ascii', 'replace')
+        split_link_title = link_title.replace(" ?", "").replace("?", " ")
+        self.link_title = split_link_title
+        self.year = self.get_year(self.link_title)
+        self.month = self.get_month(self.link_title)
 
-def process_dates(datasets):
+        # titles have things like revised on... then a date, lets strip that
+        self.cleaned_title = " ".join(self.link_title.split(" ")[:2])
+        self.name = self.url.split('/')[-1]
+        self.format = self.url.rsplit(".", 1)[-1].upper()
 
-    for dataset in datasets:
-        start_date = string_to_date(dataset["resources"][-1]['description'])
-        end_date = string_to_date(dataset["resources"][0]['description'], start=False)
+    def to_dict(self):
+        return dict(
+            description=self.link_title,
+            name=self.name,
+            url=self.url,
+            format=self.format
+        )
 
-        dataset["coverage_start_date"] = start_date
-        dataset["coverage_end_date"] = end_date
-        dataset["frequency"] = "Monthly"
+    def get_key(self):
+        return (self.cleaned_title, self.year)
 
-        qrtrs = [1 for r in dataset['resources'] if 'Quarter' in r['description']]
-        if any(qrtrs):
-            dataset["frequency"] = "Quarterly"
 
-def scrape(workspace):
-    print "Scraping FAF with workspace {}".format(workspace)
+def get_current_data():
+    resources = []
+    soup = get_soup(CURRENT_DATA)
+    latest_data_h2 = soup.find(
+        "h2", text="Organisational level tables (latest month)"
+    )
+    latest_data_container = latest_data_h2.find_next("ul")
+    links = latest_data_container.find_all("a")
+    for link in links:
+        friends_and_family_type = link.get_text().split("-")[0].strip()
+        resource = Resource(friends_and_family_type, link)
+        resources.append(resource)
+    return resources
+
+
+def get_historic_data():
+    soup = get_soup(HISTORIC_DATA)
+    resources = []
+    links = soup.find_all("a", {"class": "xls-link"})
+    headers = soup.find_all("h3")
+
+    for header in headers:
+        friends_and_family_type = header.get_text()
+        links = header.find_next("ul").find_all("a")
+        for link in links:
+            friends_and_family_type = link.find_previous("h3").get_text()
+            resources.append(Resource(friends_and_family_type, link))
+    return resources
+
+
+def get_description():
+    return to_markdown(
+        fix_bad_unicode(unicode("\n".join([i.strip() for i in DESCRIPTION])))
+    )
+
+
+def aggregate_to_dataset(resources):
+    """ We need to aggregate this by year and set titles
+        appropiately
+    """
+    aggregate_dict = defaultdict(list)
+    for resource in resources:
+        aggregate_dict[resource.get_key()].append(resource)
 
     datasets = []
+    description = get_description()
+    this_year = datetime.date.today().year
 
-    page = requests.get(ROOT)
-    html = fromstring(page.content)
+    for k, v in aggregate_dict.iteritems():
+        first_item = v[0]
+        tags = [
+            "Friends and Family",
+            "Statistics",
+            first_item.year,
+            first_item.cleaned_title.replace('&',' and ')
+        ]
+        coverage_end_date = "{}-12-01".format(first_item.year)
+        if first_item.year == this_year:
+            months = list(calendar.month_name)[1:]
+            latest_month = max(months.index(i.month) for i in v)
+            _, last_day = calendar.monthrange(first_item.year, latest_month)
+            if len(str(latest_month)) == 1:
+                latest_month = "0{}".format(latest_month)
 
-    center = html.cssselect('.column.center')[0]
+            coverage_end_date = "{0}-{1}-{2}".format(
+                first_item.year, latest_month, last_day
+            )
 
-    paras = list(center.cssselect('P'))
-
-    current_year = None
-
-    # Iterate through all of the Ps. From here until we find a <strong>
-    # is the description
-    description = []
-    num_p = 0
-    for p in paras:
-        if len(p.cssselect('STRONG')) > 0:
-            break
-        num_p += 1
-        description.append(tostring(p))
-    description = to_markdown(fix_bad_unicode(unicode(''.join(description))))
-
-    # Process the individual datasets
-    current_label = ""
-    generator = (p for p in paras[num_p:])
-    for p in generator:
-        strong = p.cssselect('STRONG')
-        if len(strong) > 0:
-            # If this strong element is a year range, we should remember it
-            c = contains_year(strong[0])
-            if c:
-                current_year = c
-                #print "Current_year is now", current_year
-                continue
-
-            current_label = strong[0].text_content().strip()
-            if len(p.cssselect('a')) == 0:
-                # Some blank paras on the page, and some where the title is separate
-                # from the links.  In this case, just skip to the next para
-                p = generator.next()
-            datasets.append(process_block(p, current_label, description, current_year))
-
-
-    # Find and process the latest datasets ...
-    latest_data = []
-    process_links = False
-    for p in paras:
-        strong = p.cssselect('STRONG')
-        if len(strong) == 1:
-            if strong[0].text_content().strip() == "Latest Data":
-                process_links = True
-            else:
-                process_links = False
-                continue
-
-        if process_links:
-            latest_data.extend(p.cssselect('a'))
-
-    datasets = filter(lambda x: x is not None, datasets)
-    process_latest(datasets, latest_data)
-    process_dates(datasets)
-
+        datasets.append(dict(
+            title=first_item.cleaned_title,
+            name=slugify.slugify(first_item.cleaned_title).lower(),
+            state="active",
+            source="https://www.england.nhs.uk/ourwork/pe/fft/friends-and-family-test-data/",
+            origin="https://www.england.nhs.uk/ourwork/pe/fft/friends-and-family-test-data/",
+            frequency="Monthly",
+            notes=description,
+            tags=tags,
+            resources=[i.to_dict() for i in v],
+            groups=['faf'],
+            coverage_start_date="{}-01-01".format(first_item.year),
+            coverage_end_date=coverage_end_date
+        ))
     return datasets
+
+
+def scrape(workspace):
+    resources = get_historic_data()
+    resources.extend(get_current_data())
+    resources = [resource for resource in resources if "Community" in resource.cleaned_title]
+    return aggregate_to_dataset(resources)
