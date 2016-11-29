@@ -161,7 +161,7 @@ def aggregate_to_dataset(resources):
         tags = [
             "Friends and Family",
             "Statistics",
-            first_item.year,
+            str(first_item.year),
             first_item.cleaned_title.replace('&',' and ')
         ]
         coverage_end_date = "{}-12-01".format(first_item.year)
