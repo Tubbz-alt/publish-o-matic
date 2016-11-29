@@ -3,7 +3,7 @@ from functools import partial
 from publish.lib import digital_nhs_helpers
 
 SCRAPER_NAME = "iapt"
-GROUP = "mental-health-dashboard"
+GROUP = "mhsds"
 PUBLISHER = "hscic"
 EXTRA_TAGS = ["Mental Health"]
 

@@ -2,7 +2,7 @@ from scrape import main as main_scrape
 from functools import partial
 from publish.lib import digital_nhs_helpers
 
-GROUP = "mental-health-dashboard"
+GROUP = "mhsds"
 EXTRA_TAGS = ["Mental Health"]
 
 def entrypoints():

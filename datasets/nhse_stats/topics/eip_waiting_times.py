@@ -90,7 +90,6 @@ def scrape(workspace):
         ],
         coverage_start_date=coverage_start_date,
         coverage_end_date=coverage_end_date,
-        groups=["eip"],
+        groups=["mental-health-dashboard-oct-2016", "eip"],
         name=get_name_from_title(TITLE),
-        skip_old_data=False
     )]

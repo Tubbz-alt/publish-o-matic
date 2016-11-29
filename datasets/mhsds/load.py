@@ -62,5 +62,5 @@ def main(workspace):
     load_data(datasets)
     group_data(datasets)
     dc.ensure_publisher('hscic')
-    dc.ensure_group("mental-health-dashboard")
+    dc.ensure_group("mhsds")
     return 0

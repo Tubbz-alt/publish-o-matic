@@ -13,9 +13,6 @@ import ffs
 
 
 def load_statistic(dataset, directory):
-    if 'Community' not in dataset['title'] and dataset.pop('skip_old_data', True):
-        print 'Skipping', dataset['title'].encode('utf8'), dataset['name'].encode('utf8')
-        return
     print 'Creating', dataset['title'].encode('utf8'), dataset['name'].encode('utf8')
     try:
         extras = []

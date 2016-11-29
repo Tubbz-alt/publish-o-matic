@@ -48,4 +48,3 @@ def main(workspace):
     u.close()
 
     json.dump(datasets, open(metadata_file, 'w'))
-

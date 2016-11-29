@@ -47,18 +47,6 @@ DESCRIPTION = [
     """
 ]
 
-FRIENDS_AND_FAMILTY_TEST_TYPES = [
-    "FFT A&E",
-    "FFT Ambulance (including PTS)",
-    "FFT Community",
-    "FFT Dental",
-    "FFT GP",
-    "FFT Inpatient",
-    "FFT Maternity",
-    "FFT Mental Health",
-    "FFT Outpatient",
-]
-
 
 HISTORIC_DATA = 'https://www.england.nhs.uk/ourwork/pe/fft/friends-and-family-test-data/fft-data-historic'
 CURRENT_DATA = "https://www.england.nhs.uk/ourwork/pe/fft/friends-and-family-test-data/"
@@ -81,6 +69,9 @@ class Resource(object):
             if lookup_year in some_date_str:
                 return year
 
+    def __repr__(self):
+        return self.get_key()
+
     def __init__(self, friends_and_family_type, anchor):
         self.friends_and_family_type = friends_and_family_type
         self.url = anchor.attrs["href"]
@@ -88,8 +79,14 @@ class Resource(object):
         link_title = anchor.get_text().encode('ascii', 'replace')
         split_link_title = link_title.replace(" ?", "").replace("?", " ")
         self.link_title = split_link_title
-        self.year = self.get_year(self.link_title)
-        self.month = self.get_month(self.link_title)
+
+        # because a single date is written differently...
+        if self.link_title.endswith("May (revised 01.05.2014)"):
+            self.year = 2013
+            self.month = 5
+        else:
+            self.year = self.get_year(self.link_title)
+            self.month = self.get_month(self.link_title)
 
         # titles have things like revised on... then a date, lets strip that
         self.cleaned_title = " ".join(self.link_title.split(" ")[:2])
@@ -104,8 +101,30 @@ class Resource(object):
             format=self.format
         )
 
+    def get_month_num(self):
+        for i, v in enumerate(calendar.month_name):
+            if v == self.month:
+                return i
+
+    def get_coverage_end_date(self):
+        if self.get_month_num() < 4:
+            return "{0}-03-31".format(self.year)
+        else:
+            return "{0}-03-31".format(self.year + 1)
+
+
+    def get_coverage_start_date(self):
+        if self.get_month_num() < 4:
+            return "{0}-04-01".format(self.year - 1)
+        else:
+            return "{0}-04-01".format(self.year)
+
     def get_key(self):
-        return (self.cleaned_title, self.year)
+        if self.get_month_num() < 4:
+            year_range = "{0}-{1}".format(self.year-1, self.year)
+        else:
+            year_range = "{0}-{1}".format(self.year, self.year+1)
+        return "{0} {1}".format(self.cleaned_title, year_range)
 
 
 def get_current_data():
@@ -154,31 +173,25 @@ def aggregate_to_dataset(resources):
 
     datasets = []
     description = get_description()
-    this_year = datetime.date.today().year
 
     for k, v in aggregate_dict.iteritems():
         first_item = v[0]
+
+        # this data should have already been done
+        if k.endswith("2014-15") or first_item.year < 2015:
+            continue
+
         tags = [
             "Friends and Family",
             "Statistics",
             str(first_item.year),
             first_item.cleaned_title.replace('&',' and ')
         ]
-        coverage_end_date = "{}-12-01".format(first_item.year)
-        if first_item.year == this_year:
-            months = list(calendar.month_name)[1:]
-            latest_month = max(months.index(i.month) for i in v)
-            _, last_day = calendar.monthrange(first_item.year, latest_month)
-            if len(str(latest_month)) == 1:
-                latest_month = "0{}".format(latest_month)
-
-            coverage_end_date = "{0}-{1}-{2}".format(
-                first_item.year, latest_month, last_day
-            )
-
+        coverage_end_date = first_item.get_coverage_end_date()
+        coverage_start_date = first_item.get_coverage_start_date()
         datasets.append(dict(
-            title=first_item.cleaned_title,
-            name=slugify.slugify(first_item.cleaned_title).lower(),
+            title=k,
+            name=slugify.slugify(k).lower(),
             state="active",
             source="https://www.england.nhs.uk/ourwork/pe/fft/friends-and-family-test-data/",
             origin="https://www.england.nhs.uk/ourwork/pe/fft/friends-and-family-test-data/",
@@ -187,7 +200,7 @@ def aggregate_to_dataset(resources):
             tags=tags,
             resources=[i.to_dict() for i in v],
             groups=['faf'],
-            coverage_start_date="{}-01-01".format(first_item.year),
+            coverage_start_date=coverage_start_date,
             coverage_end_date=coverage_end_date
         ))
     return datasets
@@ -196,5 +209,5 @@ def aggregate_to_dataset(resources):
 def scrape(workspace):
     resources = get_historic_data()
     resources.extend(get_current_data())
-    resources = [resource for resource in resources if "Community" in resource.cleaned_title]
-    return aggregate_to_dataset(resources)
+    result = aggregate_to_dataset(resources)
+    return result

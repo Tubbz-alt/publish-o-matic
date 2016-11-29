@@ -1384,5 +1384,3 @@ def main(workspace):
 
     f = os.path.join(root, "nhsof_metadata_indicators.json")
     json.dump(ccgois_indicators, open(f,'wb'), indent=2)
-
-
