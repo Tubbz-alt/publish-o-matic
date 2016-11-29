@@ -117,6 +117,9 @@ def process_link(link):
 
     return datasets
 
+def is_old(dataset):
+    end_date = datetime.datetime.strptime(dataset["coverage_end_date"], "%Y-%m-%d").date()
+    return end_date < datetime.date(2015, 9, 1)
 
 def scrape(workspace):
     print "Scraping RTT with workspace {}".format(workspace)
@@ -132,6 +135,9 @@ def scrape(workspace):
         datasets.extend(process_link(link))
 
     datasets = filter(lambda x: x is not None, datasets)
+
+    datasets = [i for i in datasets if not is_old(i)]
+
 
     # Create a dataset per year from the datasets we were given.
     return datasets

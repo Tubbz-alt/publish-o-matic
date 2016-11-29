@@ -17,8 +17,6 @@ def main(workspace):
     name = os.environ.get('STAT')
 
     for importer, modname, ispkg in pkgutil.iter_modules(topics.__path__):
-        if not modname == 'faf':
-            continue
         if name and not name == modname:
             print "Skipping {} as single name {} specified".format(modname, name)
             continue
